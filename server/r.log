@@ -1,0 +1,30 @@
+◇ injected env (5) from ..\.env // tip: ⌁ auth for agents [www.vestauth.com]
+◇ injected env (0) from ..\.env // tip: ◈ secrets for agents [www.dotenvx.com]
+Seeding database for test...
+Seeded slot 34b9149e-b3ab-4e94-b31b-fea77bd7f4a3. Firing 20 concurrent requests...
+Unexpected result: { status: 500, error: 'TypeError: fetch failed' }
+Unexpected result: { status: 500, error: 'TypeError: fetch failed' }
+Unexpected result: { status: 500, error: 'TypeError: fetch failed' }
+Unexpected result: { status: 500, error: 'TypeError: fetch failed' }
+Unexpected result: { status: 500, error: 'TypeError: fetch failed' }
+Unexpected result: { status: 500, error: 'TypeError: fetch failed' }
+Unexpected result: { status: 500, error: 'TypeError: fetch failed' }
+Unexpected result: { status: 500, error: 'TypeError: fetch failed' }
+Unexpected result: { status: 500, error: 'TypeError: fetch failed' }
+Unexpected result: { status: 500, error: 'TypeError: fetch failed' }
+Unexpected result: { status: 500, error: 'TypeError: fetch failed' }
+Unexpected result: { status: 500, error: 'TypeError: fetch failed' }
+Unexpected result: { status: 500, error: 'TypeError: fetch failed' }
+Unexpected result: { status: 500, error: 'TypeError: fetch failed' }
+Unexpected result: { status: 500, error: 'TypeError: fetch failed' }
+Unexpected result: { status: 500, error: 'TypeError: fetch failed' }
+Unexpected result: { status: 500, error: 'TypeError: fetch failed' }
+Unexpected result: { status: 500, error: 'TypeError: fetch failed' }
+Unexpected result: { status: 500, error: 'TypeError: fetch failed' }
+Unexpected result: { status: 500, error: 'TypeError: fetch failed' }
+
+--- Test Summary ---
+Success (201): 0 (Expected: 1)
+Conflict (409): 0 (Expected: 19)
+Other: 20 (Expected: 0)
+❌ TEST FAILED: Concurrency locking did not behave as expected.

@@ -1,0 +1,123 @@
+[
+  {
+    "status": 409,
+    "data": {
+      "error": "SLOT_NOT_AVAILABLE"
+    }
+  },
+  {
+    "status": 409,
+    "data": {
+      "error": "SLOT_NOT_AVAILABLE"
+    }
+  },
+  {
+    "status": 409,
+    "data": {
+      "error": "SLOT_NOT_AVAILABLE"
+    }
+  },
+  {
+    "status": 409,
+    "data": {
+      "error": "SLOT_NOT_AVAILABLE"
+    }
+  },
+  {
+    "status": 409,
+    "data": {
+      "error": "SLOT_NOT_AVAILABLE"
+    }
+  },
+  {
+    "status": 409,
+    "data": {
+      "error": "SLOT_NOT_AVAILABLE"
+    }
+  },
+  {
+    "status": 409,
+    "data": {
+      "error": "SLOT_NOT_AVAILABLE"
+    }
+  },
+  {
+    "status": 409,
+    "data": {
+      "error": "SLOT_NOT_AVAILABLE"
+    }
+  },
+  {
+    "status": 409,
+    "data": {
+      "error": "SLOT_NOT_AVAILABLE"
+    }
+  },
+  {
+    "status": 201,
+    "data": {
+      "booking_id": "019b4328-2df8-4132-a5a0-5af3653b89af",
+      "payment_id": "77437772-9908-43fb-ae8c-e4ac99224e55"
+    }
+  },
+  {
+    "status": 409,
+    "data": {
+      "error": "SLOT_NOT_AVAILABLE"
+    }
+  },
+  {
+    "status": 409,
+    "data": {
+      "error": "SLOT_NOT_AVAILABLE"
+    }
+  },
+  {
+    "status": 409,
+    "data": {
+      "error": "SLOT_NOT_AVAILABLE"
+    }
+  },
+  {
+    "status": 409,
+    "data": {
+      "error": "SLOT_NOT_AVAILABLE"
+    }
+  },
+  {
+    "status": 409,
+    "data": {
+      "error": "SLOT_NOT_AVAILABLE"
+    }
+  },
+  {
+    "status": 409,
+    "data": {
+      "error": "SLOT_NOT_AVAILABLE"
+    }
+  },
+  {
+    "status": 409,
+    "data": {
+      "error": "SLOT_NOT_AVAILABLE"
+    }
+  },
+  {
+    "status": 409,
+    "data": {
+      "error": "SLOT_NOT_AVAILABLE"
+    }
+  },
+  {
+    "status": 409,
+    "data": {
+      "error": "SLOT_NOT_AVAILABLE"
+    }
+  },
+  {
+    "status": 409,
+    "data": {
+      "error": "SLOT_NOT_AVAILABLE"
+    }
+  }
+]
