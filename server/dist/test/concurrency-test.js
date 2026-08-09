@@ -3,6 +3,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const dotenv_1 = __importDefault(require("dotenv"));
+const path_1 = __importDefault(require("path"));
+dotenv_1.default.config({ path: path_1.default.resolve(process.cwd(), '../.env') });
 const db_1 = __importDefault(require("../src/db"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 async function runTest() {
@@ -10,8 +13,25 @@ async function runTest() {
     if (!jwtSecret) {
         throw new Error('SUPABASE_JWT_SECRET is required');
     }
-    // Use a hardcoded dummy user ID for testing
-    const testUserId = '00000000-0000-0000-0000-000000000000';
+    // Fetch or create a test user in auth.users
+    let testUserId = '00000000-0000-0000-0000-000000000000';
+    try {
+        const userResult = await db_1.default.query(`SELECT id FROM auth.users LIMIT 1`);
+        if (userResult.rows.length > 0) {
+            testUserId = userResult.rows[0].id;
+        }
+        else {
+            const newUser = await db_1.default.query(`
+        INSERT INTO auth.users (id, instance_id, aud, role, email) 
+        VALUES ($1, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'test@example.com') 
+        RETURNING id
+      `, [testUserId]);
+            testUserId = newUser.rows[0].id;
+        }
+    }
+    catch (err) {
+        console.error('Warning: could not get auth user:', err.message);
+    }
     // Sign a test token
     const token = jsonwebtoken_1.default.sign({ sub: testUserId, role: 'authenticated' }, jwtSecret);
     console.log('Seeding database for test...');
@@ -76,6 +96,7 @@ async function runTest() {
             console.error('Unexpected result:', r);
         }
     }
+    require('fs').writeFileSync('result.json', JSON.stringify(results, null, 2));
     console.log('\n--- Test Summary ---');
     console.log(`Success (201): ${successCount} (Expected: 1)`);
     console.log(`Conflict (409): ${conflictCount} (Expected: 19)`);
