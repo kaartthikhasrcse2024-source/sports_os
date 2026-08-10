@@ -6,7 +6,6 @@ export default function GroupBooking() {
     const [amount, setAmount] = useState(1500);
     const [emails, setEmails] = useState<string[]>(['']);
     const [bookingId, setBookingId] = useState<string | null>(null);
-    const [contributions, setContributions] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -17,7 +16,7 @@ export default function GroupBooking() {
     };
 
     useEffect(() => {
-        let interval: NodeJS.Timeout;
+        let interval: ReturnType<typeof setInterval>;
         if (bookingId) {
             interval = setInterval(fetchContributions, 3000); // 3 second polling
         }
@@ -68,10 +67,6 @@ export default function GroupBooking() {
         setLoading(false);
     };
 
-    const handleCheckout = async (contribId: string) => {
-        // trigger razorpay
-    };
-
     return (
         <div className="min-h-screen bg-dark-900 text-white p-8">
             <div className="max-w-3xl mx-auto">
@@ -83,18 +78,18 @@ export default function GroupBooking() {
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-gray-400 mb-1">Slot ID</label>
-                                <input type="text" value={slotId} onChange={e => setSlotId(e.target.value)} className="w-full bg-dark-900 border border-dark-700 p-2 rounded" />
+                                <input type="text" value={slotId} onChange={e => setSlotId(e.target.value)} className="w-full bg-dark-900 border border-dark-700 p-2 rounded text-white focus:outline-none focus:border-primary-500 transition-colors" />
                             </div>
                             <div>
                                 <label className="block text-gray-400 mb-1">Total Amount (₹)</label>
-                                <input type="number" value={amount} onChange={e => setAmount(Number(e.target.value))} className="w-full bg-dark-900 border border-dark-700 p-2 rounded" />
+                                <input type="number" value={amount} onChange={e => setAmount(Number(e.target.value))} className="w-full bg-dark-900 border border-dark-700 p-2 rounded text-white focus:outline-none focus:border-primary-500 transition-colors" />
                             </div>
 
                             <div>
                                 <label className="block text-gray-400 mb-2">Split with Teammates (Emails)</label>
                                 {emails.map((email, i) => (
                                     <div key={i} className="flex gap-2 mb-2">
-                                        <input type="email" value={email} onChange={e => updateEmail(i, e.target.value)} className="flex-1 bg-dark-900 border border-dark-700 p-2 rounded" placeholder="teammate@example.com" />
+                                        <input type="email" value={email} onChange={e => updateEmail(i, e.target.value)} className="flex-1 bg-dark-900 border border-dark-700 p-2 rounded text-white focus:outline-none focus:border-primary-500 transition-colors" placeholder="teammate@example.com" />
                                         <button onClick={() => removeEmail(i)} className="bg-red-500/20 text-red-500 px-3 rounded hover:bg-red-500/30">X</button>
                                     </div>
                                 ))}

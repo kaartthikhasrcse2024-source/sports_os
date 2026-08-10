@@ -14,6 +14,21 @@ export default function PlayerProfile() {
 
     if (!data) return <div className="h-screen bg-dark-900 text-white flex justify-center items-center">Loading Data...</div>;
 
+    if (data.error || !data.career_totals) {
+        return (
+            <div className="min-h-screen bg-dark-900 text-white p-8 max-w-4xl mx-auto flex flex-col items-center justify-center">
+                <div className="text-4xl mb-4">⚠️</div>
+                <h1 className="text-2xl font-bold text-gray-300">Player Profile Unavailable</h1>
+                <p className="text-gray-500 mt-2">Could not fetch stats for this player. ({data.error || 'No totals found'})</p>
+                {id === 'guest-id' && (
+                    <p className="text-primary-500 mt-4 text-sm mt-8 border border-primary-500/50 bg-primary-500/10 p-4 rounded text-center">
+                        You are browsing as a guest. Your guest ID is not registered in the game database.
+                    </p>
+                )}
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-dark-900 text-white p-8 max-w-4xl mx-auto">
             <div className="flex items-center gap-4 mb-8">

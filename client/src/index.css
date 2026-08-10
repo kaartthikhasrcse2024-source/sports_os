@@ -1,9 +1,15 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer base {
-  body {
-    @apply bg-dark-900 text-gray-100 antialiased;
-  }
+@theme {
+  --color-dark-900: #111111;
+  --color-dark-800: #1f1f1f;
+  --color-dark-700: #2d2d2d;
+  --color-primary-500: #c5a059;
+  --color-primary-400: #d7b875;
+}
+
+body {
+  background-color: #0f172a;
+  color: #f3f4f6;
+  font-family: system-ui, -apple-system, sans-serif;
 }

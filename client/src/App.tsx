@@ -10,19 +10,22 @@ import PlayerProfile from './pages/PlayerProfile';
 import FreeAgents from './pages/FreeAgents';
 import SlotGrid from './pages/SlotGrid';
 import { useEffect } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
 
 function App() {
   useEffect(() => {
-    PushNotifications.requestPermissions().then(result => {
-      if (result.receive === 'granted') {
-        PushNotifications.register();
-      }
-    }).catch(console.error);
+    if (Capacitor.isNativePlatform()) {
+      PushNotifications.requestPermissions().then(result => {
+        if (result.receive === 'granted') {
+          PushNotifications.register();
+        }
+      }).catch(console.error);
 
-    PushNotifications.addListener('registration', (token) => {
-      console.log('Push notification mapping successful. Device token:', token.value);
-    }).catch(console.error);
+      PushNotifications.addListener('registration', (token) => {
+        console.log('Push notification mapping successful. Device token:', token.value);
+      }).catch(console.error);
+    }
   }, []);
 
   return (
@@ -39,7 +42,7 @@ function App() {
           <Route path="/referee" element={<RefereeScorecard />} />
           <Route path="/profile/:id" element={<PlayerProfile />} />
           <Route path="/free-agents" element={<FreeAgents />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </Router>
     </div>

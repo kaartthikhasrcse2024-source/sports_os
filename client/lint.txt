@@ -1,0 +1,69 @@
+﻿
+> client@0.0.0 lint
+> oxlint
+
+
+  ! eslint(no-unused-vars): Variable 'contributions' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/pages/GroupBooking.tsx:9:12]
+  8 |     const [bookingId, setBookingId] = useState<string | null>(null);
+  9 |     const [contributions, setContributions] = useState<any[]>([]);
+    :            ^^^^^^|^^^^^^
+    :                  `-- 'contributions' is declared here
+ 10 |     const [loading, setLoading] = useState(false);
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'setContributions' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/pages/GroupBooking.tsx:9:27]
+  8 |     const [bookingId, setBookingId] = useState<string | null>(null);
+  9 |     const [contributions, setContributions] = useState<any[]>([]);
+    :                           ^^^^^^^^|^^^^^^^
+    :                                   `-- 'setContributions' is declared here
+ 10 |     const [loading, setLoading] = useState(false);
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'handleCheckout' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/pages/GroupBooking.tsx:71:11]
+ 70 | 
+ 71 |     const handleCheckout = async (contribId: string) => {
+    :           ^^^^^^^|^^^^^^
+    :                  `-- 'handleCheckout' is declared here
+ 72 |         // trigger razorpay
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Parameter 'contribId' is declared but never used. Unused parameters should start with a '_'.
+    ,-[src/pages/GroupBooking.tsx:71:35]
+ 70 | 
+ 71 |     const handleCheckout = async (contribId: string) => {
+    :                                   ^^^^|^^^^
+    :                                       `-- 'contribId' is declared here
+ 72 |         // trigger razorpay
+    `----
+  help: Consider removing this parameter.
+
+  ! eslint(no-unused-vars): Identifier 'supabase' is imported but never used.
+   ,-[src/pages/MapSearch.tsx:2:10]
+ 1 | import { useState, useEffect } from 'react';
+ 2 | import { supabase } from '../supabase';
+   :          ^^^^|^^^
+   :              `-- 'supabase' is imported here
+ 3 | import { Geolocation } from '@capacitor/geolocation';
+   `----
+  help: Consider removing this import.
+
+  ! react-hooks(exhaustive-deps): React Hook useEffect has a missing dependency: 'fetchNearby'
+    ,-[src/pages/MapSearch.tsx:71:8]
+ 69 |     useEffect(() => {
+ 70 |         if (location) fetchNearby();
+    :                       ^^^^^|^^^^^
+    :                            `-- useEffect uses `fetchNearby` here
+ 71 |     }, [location, radius, tagFilter]);
+    :        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 72 | 
+    `----
+  help: Either include it or remove the dependency array.
+
+Found 6 warnings and 0 errors.
+Finished in 56ms on 16 files with 104 rules using 12 threads.

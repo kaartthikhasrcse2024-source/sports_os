@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../supabase';
 import { Geolocation } from '@capacitor/geolocation';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -68,6 +67,7 @@ export default function MapSearch() {
 
     useEffect(() => {
         if (location) fetchNearby();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [location, radius, tagFilter]);
 
     return (
