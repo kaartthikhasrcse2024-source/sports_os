@@ -95,15 +95,6 @@ export default function Login() {
                 <p className="mt-4 text-center text-sm text-gray-500">
                     Don't have an account? <Link to="/signup" className="text-primary-500 hover:underline">Sign up</Link>
                 </p>
-
-                <div className="mt-6 border-t border-dark-700 pt-6">
-                    <button
-                        onClick={() => navigate('/dashboard')}
-                        className="w-full bg-dark-700 hover:bg-dark-600 text-white font-semibold py-2 px-4 rounded transition-colors"
-                    >
-                        Continue without logging in
-                    </button>
-                </div>
             </div>
         </div>
     );

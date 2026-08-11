@@ -72,6 +72,9 @@ app.get('/api/profile', requireAuth, async (req, res) => {
     }
 });
 
+import scoutRoutes from './scout';
+app.use('/api/v1/scout', scoutRoutes);
+
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });

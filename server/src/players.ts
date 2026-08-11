@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import pool from './db';
+import { requireAuth } from './auth';
 
 const router = Router();
 
@@ -51,6 +52,53 @@ router.get('/free-agents', async (req, res) => {
         const results = await pool.query(query, params);
         res.json(results.rows);
     } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+// Fetch public athletic profile
+router.get('/:id/athletic', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const result = await pool.query('SELECT * FROM athletic_profiles WHERE id = $1', [id]);
+        res.json(result.rows[0] || null);
+    } catch (e: any) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Update personal physical attributes and scouting availability
+router.put('/athletic', requireAuth, async (req, res) => {
+    const user = (req as any).user;
+    const {
+        height_cm, weight_kg, dominant_foot_hand, primary_position,
+        secondary_positions, playing_status, open_for_scouting
+    } = req.body;
+
+    try {
+        const result = await pool.query(`
+            INSERT INTO athletic_profiles (
+                id, height_cm, weight_kg, dominant_foot_hand, primary_position, 
+                secondary_positions, playing_status, open_for_scouting, updated_at
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+            ON CONFLICT (id) DO UPDATE SET
+                height_cm = EXCLUDED.height_cm,
+                weight_kg = EXCLUDED.weight_kg,
+                dominant_foot_hand = EXCLUDED.dominant_foot_hand,
+                primary_position = EXCLUDED.primary_position,
+                secondary_positions = EXCLUDED.secondary_positions,
+                playing_status = EXCLUDED.playing_status,
+                open_for_scouting = EXCLUDED.open_for_scouting,
+                updated_at = NOW()
+            RETURNING *;
+        `, [
+            user.sub, height_cm, weight_kg, dominant_foot_hand, primary_position,
+            secondary_positions, playing_status, open_for_scouting
+        ]);
+
+        res.json(result.rows[0]);
+    } catch (e: any) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 export default router;

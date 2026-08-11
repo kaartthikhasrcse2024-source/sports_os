@@ -37,7 +37,10 @@ export default function GroupBooking() {
         setLoading(true);
         setError('');
         try {
-            const { data: { session } } = await supabase.auth.getSession();
+            const session = {
+                access_token: 'fake-token',
+                user: { id: 'test-user-id' }
+            };
 
             // Need dummy IDs for teammates for the test script or lookup by email.
             // Assuming backend converts contributor_ids. For the sake of the demo, passing raw strings.

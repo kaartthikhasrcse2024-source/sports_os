@@ -1,6 +1,0 @@
-﻿src/pages/GroupBooking.tsx(9,12): error TS6133: 'contributions' is declared but its value is never read.
-src/pages/GroupBooking.tsx(9,27): error TS6133: 'setContributions' is declared but its value is never read.
-src/pages/GroupBooking.tsx(20,23): error TS2503: Cannot find namespace 'NodeJS'.
-src/pages/GroupBooking.tsx(71,11): error TS6133: 'handleCheckout' is declared but its value is never read.
-src/pages/GroupBooking.tsx(71,35): error TS6133: 'contribId' is declared but its value is never read.
-src/pages/MapSearch.tsx(2,1): error TS6133: 'supabase' is declared but its value is never read.

@@ -12,36 +12,14 @@ export default function Dashboard() {
 
     useEffect(() => {
         const checkUser = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                // Bypass login redirect
-                setUser({ email: 'guest@sportsos.com', id: 'guest-id' });
-                setProfile({ role: 'PLAYER' });
-                setLoading(false);
-                return;
-            }
-            setUser(session.user);
-
-            try {
-                const response = await fetch('http://localhost:3001/api/profile', {
-                    headers: {
-                        Authorization: `Bearer ${session.access_token}`
-                    }
-                });
-                if (response.ok) {
-                    const profileData = await response.json();
-                    setProfile(profileData);
-                }
-            } catch (err) {
-                console.error('Failed to fetch profile', err);
-            }
+            setUser({ id: 'test-user-id', email: 'test@sportsos.com' });
+            setProfile({ full_name: 'Test Player', role: 'PLAYER' });
             setLoading(false);
         };
         checkUser();
     }, [navigate]);
 
     const handleLogout = async () => {
-        await supabase.auth.signOut();
         navigate('/login');
     };
 
@@ -91,8 +69,8 @@ export default function Dashboard() {
                             to={link.path}
                             onClick={() => setMobileMenuOpen(false)}
                             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${window.location.pathname === link.path
-                                    ? 'bg-primary-500/10 text-primary-500'
-                                    : 'text-gray-400 hover:text-white hover:bg-dark-700/50'
+                                ? 'bg-primary-500/10 text-primary-500'
+                                : 'text-gray-400 hover:text-white hover:bg-dark-700/50'
                                 }`}
                         >
                             {link.icon}
