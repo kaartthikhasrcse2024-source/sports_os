@@ -52,11 +52,12 @@ export default function PlayerProfile() {
 
     if (!data) return <div className="h-screen bg-dark-900 text-white flex justify-center items-center">Loading Data...</div>;
 
-    if (data.error || (!data.career_totals && !athleticData)) {
+    if (data.error && data.error === 'Player not found') {
         return (
             <div className="min-h-screen bg-dark-900 text-white p-8 max-w-4xl mx-auto flex flex-col items-center justify-center">
                 <div className="text-4xl mb-4">⚠️</div>
                 <h1 className="text-2xl font-bold text-gray-300">Player Profile Unavailable</h1>
+                <p className="text-gray-400 mt-2">Could not find a profile under this ID.</p>
             </div>
         );
     }
@@ -89,7 +90,7 @@ export default function PlayerProfile() {
                     <span className="text-primary-400">⚡</span> Athletic Identity
                 </h2>
 
-                {athleticData ? (
+                {athleticData && !athleticData.error ? (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                         <div className="bg-dark-900 p-4 rounded-lg flex flex-col items-center justify-center text-center">
                             <span className="text-xs text-gray-500 uppercase">Height / Weight</span>

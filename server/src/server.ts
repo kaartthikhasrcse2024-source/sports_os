@@ -75,6 +75,21 @@ app.get('/api/profile', requireAuth, async (req, res) => {
 import scoutRoutes from './scout';
 app.use('/api/v1/scout', scoutRoutes);
 
+import ownerRoutes from './owner';
+app.use('/api/v1/owner', ownerRoutes);
+
+import playerRoutesServer from './player';
+app.use('/api/v1/player', playerRoutesServer);
+
+import verificationRoutes from './verification';
+app.use('/api/v1/verification', verificationRoutes);
+
+import venueRoutes from './venues';
+app.use('/api/v1/venues', venueRoutes);
+
+import leaseRoutes from './leases';
+app.use('/api/v1/leases', requireAuth, leaseRoutes);
+
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });

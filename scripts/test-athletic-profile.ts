@@ -1,10 +1,4 @@
-import fs from 'fs';
 import pool from '../server/src/db';
-import { supabase } from '@supabase/supabase-js';
-
-// Setup supabase admin
-const supabaseUrl = process.env.VITE_SUPABASE_URL || 'http://localhost:54321';
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
 
 async function testAthleticProfile() {
     console.log('[TEST] Starting Athletic Profile tests...');

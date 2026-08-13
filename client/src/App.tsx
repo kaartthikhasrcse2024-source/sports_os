@@ -1,7 +1,9 @@
 import { Navigate, Route, Routes, BrowserRouter as Router } from 'react-router-dom';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import Dashboard from './pages/Dashboard';
+import Landing from './pages/Landing';
+import PlayerAuth from './pages/PlayerAuth';
+import OwnerAuth from './pages/OwnerAuth';
+import OrganizerAuth from './pages/OrganizerAuth';
+import DashboardSwitch from './pages/DashboardSwitch';
 import GroupBooking from './pages/GroupBooking';
 import MapSearch from './pages/MapSearch';
 import TournamentBracket from './pages/TournamentBracket';
@@ -9,6 +11,10 @@ import RefereeScorecard from './pages/RefereeScorecard';
 import PlayerProfile from './pages/PlayerProfile';
 import FreeAgents from './pages/FreeAgents';
 import SlotGrid from './pages/SlotGrid';
+import VerifyPhone from './components/VerifyPhone';
+import VerificationUpload from './components/VerificationUpload';
+import AdminApproval from './components/AdminApproval';
+import VenueMapDiscovery from './components/VenueMapDiscovery';
 import { useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
@@ -32,9 +38,24 @@ function App() {
     <div className="pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] min-h-screen bg-dark-900">
       <Router>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          {/* PUBLIC DOORS */}
+          <Route path="/" element={<Landing />} />
+          <Route path="/player/login" element={<PlayerAuth mode="login" />} />
+          <Route path="/player/signup" element={<PlayerAuth mode="signup" />} />
+          <Route path="/owner/login" element={<OwnerAuth mode="login" />} />
+          <Route path="/owner/signup" element={<OwnerAuth mode="signup" />} />
+          <Route path="/organizer/login" element={<OrganizerAuth mode="login" />} />
+          <Route path="/organizer/signup" element={<OrganizerAuth mode="signup" />} />
+
+          {/* VERIFICATION SANDBOX */}
+          <Route path="/verify-phone" element={<VerifyPhone />} />
+          <Route path="/verify-owner" element={<VerificationUpload role="TURF_OWNER" />} />
+          <Route path="/verify-organizer" element={<VerificationUpload role="TOURNAMENT_ORGANIZER" />} />
+          <Route path="/admin-verify" element={<AdminApproval />} />
+          <Route path="/map" element={<VenueMapDiscovery />} />
+
+          {/* SECURE GATED ROUTES (TEMPORARILY UNGATED) */}
+          <Route path="/dashboard" element={<DashboardSwitch />} />
           <Route path="/group-booking" element={<GroupBooking />} />
           <Route path="/map-search" element={<MapSearch />} />
           <Route path="/bracket" element={<TournamentBracket />} />
@@ -42,7 +63,8 @@ function App() {
           <Route path="/referee" element={<RefereeScorecard />} />
           <Route path="/profile/:id" element={<PlayerProfile />} />
           <Route path="/free-agents" element={<FreeAgents />} />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
     </div>

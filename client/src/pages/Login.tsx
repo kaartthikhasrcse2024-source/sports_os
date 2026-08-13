@@ -14,14 +14,29 @@ export default function Login() {
         setLoading(true);
         setError('');
 
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password,
         });
 
         if (error) {
-            setError(error.message);
+            console.error('Authentication Error [Login]:', {
+                message: error.message,
+                status: error.status,
+                name: error.name
+            });
+
+            // Map common error status codes to clearer feedback if necessary
+            let feedback = error.message;
+            if (error.status === 400) {
+                feedback = 'Invalid login credentials. Please verify your email and password.';
+            } else if (error.status === 401) {
+                feedback = 'Unauthorized. Email may not be confirmed yet.';
+            }
+
+            setError(feedback);
         } else {
+            console.log('Login successful for:', data.user?.email);
             navigate('/dashboard');
         }
         setLoading(false);

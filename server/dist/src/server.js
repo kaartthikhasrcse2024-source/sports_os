@@ -63,6 +63,8 @@ app.get('/api/profile', auth_1.requireAuth, async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+const scout_1 = __importDefault(require("./scout"));
+app.use('/api/v1/scout', scout_1.default);
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });

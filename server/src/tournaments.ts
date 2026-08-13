@@ -1,10 +1,11 @@
 import { Router } from 'express';
 import pool from './db';
+import { requireVerifiedRole } from './auth';
 
 const router = Router();
 
-// Create Tournament
-router.post('/', async (req, res) => {
+// Create Tournament (VERIFIED TOURNAMENT ORGANIZER ONLY)
+router.post('/', requireVerifiedRole(['TOURNAMENT_ORGANIZER']), async (req, res) => {
     const { facility_id, name, format, max_teams, start_date } = req.body;
     try {
         const result = await pool.query(

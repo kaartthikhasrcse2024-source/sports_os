@@ -1,7 +1,13 @@
 import { Router, Request, Response } from 'express';
 import pool from './db';
+import { requireVerifiedRole } from './auth';
 
 const router = Router();
+
+router.post('/', requireVerifiedRole(['TURF_OWNER']), async (req: Request, res: Response) => {
+    // Scaffold functionality protected by strict verification guard
+    res.json({ success: true, message: 'Facility creation executed physically against boundaries.' });
+});
 
 router.get('/nearby', async (req: Request, res: Response) => {
     const { lat, lng, radius_km = 10, tags } = req.query;

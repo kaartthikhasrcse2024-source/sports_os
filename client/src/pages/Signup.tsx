@@ -6,6 +6,7 @@ export default function Signup() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [fullName, setFullName] = useState('');
+    const [role, setRole] = useState('player');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function Signup() {
             options: {
                 data: {
                     full_name: fullName,
+                    role: role
                 }
             }
         });
@@ -28,14 +30,13 @@ export default function Signup() {
         if (error) {
             setError(error.message);
         } else {
-            // You could route to login or show success message for email confirm
             navigate('/login');
         }
         setLoading(false);
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-dark-900 border-t-4 border-primary-500">
+        <div className="min-h-screen flex items-center justify-center bg-dark-900 border-t-4 border-primary-500 py-12 px-4">
             <div className="bg-dark-800 p-8 rounded-lg shadow-2xl max-w-md w-full border border-dark-700">
                 <h2 className="text-3xl font-bold text-white mb-6 text-center">
                     Create Account
@@ -48,6 +49,17 @@ export default function Signup() {
                 )}
 
                 <form onSubmit={handleSignup} className="space-y-4">
+                    <div>
+                        <label className="block text-gray-400 text-sm mb-1">Account Role</label>
+                        <select
+                            value={role}
+                            onChange={(e) => setRole(e.target.value)}
+                            className="w-full bg-dark-900 border border-dark-700 rounded p-2 text-white focus:outline-none focus:border-primary-500 transition-colors"
+                        >
+                            <option value="player">Player / Athlete</option>
+                            <option value="venue_owner">Turf Owner / Manager</option>
+                        </select>
+                    </div>
                     <div>
                         <label className="block text-gray-400 text-sm mb-1">Full Name</label>
                         <input
