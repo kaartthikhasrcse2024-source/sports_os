@@ -46,7 +46,7 @@ export default function OrganizerAuth({ mode }: { mode: 'login' | 'signup' }) {
                 <div className="flex justify-center mb-6 text-cyan-500">
                     <Trophy size={48} />
                 </div>
-                <h2 className="text-3xl font-black text-white mb-2 text-center tracking-tighter">
+                <h2 className="text-3xl font-black text-gray-900 mb-2 text-center tracking-tighter">
                     ORGANIZER HQ
                 </h2>
                 <p className="text-cyan-100/50 text-center mb-8 font-medium">{mode === 'login' ? 'Authorize ecosystem access.' : 'Establish league authority.'}</p>
@@ -101,17 +101,17 @@ export default function OrganizerAuth({ mode }: { mode: 'login' | 'signup' }) {
 
                 <p className="mt-8 text-center text-sm text-cyan-700 font-medium">
                     {mode === 'login' ? (
-                        <>New organization? <Link to="/organizer/signup" className="text-cyan-500 hover:text-white transition-colors">Establish League</Link></>
+                        <>New organization? <Link to="/organizer/signup" className="text-cyan-500 hover:text-gray-900 transition-colors">Establish League</Link></>
                     ) : (
-                        <>Existing authority? <Link to="/organizer/login" className="text-cyan-500 hover:text-white transition-colors">Authorize Access</Link></>
+                        <>Existing authority? <Link to="/organizer/login" className="text-cyan-500 hover:text-gray-900 transition-colors">Authorize Access</Link></>
                     )}
                 </p>
                 <div className="mt-4 text-center">
-                    <Link to="/" className="text-xs text-cyan-800 hover:text-cyan-400 uppercase tracking-widest font-bold">← Systems Directory</Link>
+                    <Link to="/" className="text-xs text-cyan-800 hover:text-cyan-700 uppercase tracking-widest font-bold">← Systems Directory</Link>
                 </div>
 
                 <div className="mt-8 border-t border-[#164E63] pt-6 text-center">
-                    <button onClick={() => { localStorage.setItem('dev_mock_role', 'TOURNAMENT_ORGANIZER'); navigate('/dashboard'); }} className="text-cyan-700 hover:text-cyan-300 text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2 w-full">
+                    <button onClick={() => { localStorage.setItem('dev_mock_role', 'TOURNAMENT_ORGANIZER'); navigate('/dashboard'); }} className="text-cyan-700 hover:text-cyan-600 text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2 w-full">
                         Skip Authentication <span className="opacity-50">(Dev Mode)</span>
                     </button>
                 </div>

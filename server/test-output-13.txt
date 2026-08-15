@@ -1,0 +1,56 @@
+◇ injected env (6) from ..\.env // tip: ⌘ suppress logs { quiet: true }
+--- STARTING PAYMENT ECOSYSTEM TEST (RAZORPAY TEST MODE) ---
+
+[Setup] Resolving dummy turf, slot, and user...
+
+--- TEST SCENARIO A: CASUAL ENTRY BOOKING ---
+-> Hitting POST /create-order...
+[Success] Generated test Order ID: order_mock_1786784726642
+-> Confirming signature and distributing ledger logic...
+[Success] Casual Payment signature verified!
+[Success] Booking marked as CONFIRMED.
+[Success] Ledger Split Correct: Platform cut 5% (₹0.6), Net Payout ₹11.4
+
+--- TEST SCENARIO B: 4-WAY SPLIT ESCROW (1200 TOTAL) ---
+[Setup] Generated 4 pending contribution escrow limits of ₹300 each... Slot HELD.
+
+-> Collecting Escrow Share 1/4...
+[Share 1] Booking Status: pending | Slot Status: held
+
+-> Collecting Escrow Share 2/4...
+[Share 2] Booking Status: pending | Slot Status: held
+
+-> Collecting Escrow Share 3/4...
+[Share 3] Booking Status: pending | Slot Status: held
+
+-> Collecting Escrow Share 4/4...
+[Share 4] Booking Status: confirmed | Slot Status: booked
+
+[Success] Escrow Full Completion Split Correct: Platform cut 5% (₹63), Net Payout ₹1197
+
+--- TEST SCENARIO C: VENUE LEASE 8% COMM & ENTRY FEE 10% COMM ---
+-> Leasing Venue (₹50k)...
+[Success] Venue Lease: Net Owner Payout ₹46000 / Comm (8%) ₹4000
+-> Player Entry Fee (₹2k)...
+Test script crashed: error: null value in column "format" of relation "tournaments" violates not-null constraint
+    at C:\Users\Karthika SR\sports_os\sports_os\server\node_modules\pg\lib\client.js:652:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async runTests (C:\Users\Karthika SR\sports_os\sports_os\server\scripts\test-payment-gateway.ts:163:25) {
+  length: 335,
+  severity: 'ERROR',
+  code: '23502',
+  detail: 'Failing row contains (afc23c2d-bddf-4d7e-b681-0c6d8e2503dd, 204ab4f1-1996-4285-94db-c02f4cf725d0, Test League, null, null, null, 2026-08-15 09:05:29.534976).',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'tournaments',
+  column: 'format',
+  dataType: undefined,
+  constraint: undefined,
+  file: 'execMain.c',
+  line: '1981',
+  routine: 'ExecConstraints'
+}

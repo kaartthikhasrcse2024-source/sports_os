@@ -60,8 +60,8 @@ export default function PlayerDashboard() {
                 {/* Header Sequence */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-dark-800 pb-6">
                     <div>
-                        <h1 className="text-4xl font-black text-white uppercase tracking-tighter shadow-black drop-shadow-md">
-                            Player <span className="text-primary-500">Command Control</span>
+                        <h1 className="text-4xl font-black text-gray-900 uppercase tracking-tighter shadow-gray-200 drop-shadow-md">
+                            Player <span className="text-emerald-700">Command Control</span>
                         </h1>
                     </div>
                     <div className="mt-4 md:mt-0 flex gap-2">
@@ -69,7 +69,7 @@ export default function PlayerDashboard() {
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab as any)}
-                                className={`px-4 py-2 rounded-xl text-xs font-black tracking-widest uppercase transition-colors ${activeTab === tab ? 'bg-primary-500 text-black' : 'bg-dark-800 text-gray-400 hover:bg-dark-700 hover:text-white'}`}
+                                className={`px-4 py-2 rounded-xl text-xs font-black tracking-widest uppercase transition-colors ${activeTab === tab ? 'bg-emerald-600 text-black' : 'bg-white text-gray-600 hover:bg-dark-700 hover:text-gray-900'}`}
                             >
                                 {tab}
                             </button>
@@ -79,18 +79,18 @@ export default function PlayerDashboard() {
 
                 {/* Dashboard Tabs Logic */}
                 {activeTab === 'bookings' && (
-                    <div className="bg-dark-900 border border-dark-700/50 p-8 rounded-3xl shadow-xl">
-                        <h2 className="text-xl text-white font-black uppercase mb-6 flex items-center gap-2"><Calendar className="text-primary-500" /> Escrow Operations</h2>
+                    <div className="bg-gray-50 border border-gray-300/50 p-8 rounded-3xl shadow-xl">
+                        <h2 className="text-xl text-gray-900 font-black uppercase mb-6 flex items-center gap-2"><Calendar className="text-emerald-700" /> Escrow Operations</h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {/* Mock Booking Node */}
-                            <div className="bg-dark-800 border border-dark-700 p-4 rounded-xl flex flex-col gap-2">
+                            <div className="bg-white border border-gray-300 p-4 rounded-xl flex flex-col gap-2">
                                 <div className="flex justify-between items-start">
-                                    <h3 className="text-white font-bold tracking-tight">Manhattan Gridiron</h3>
+                                    <h3 className="text-gray-900 font-bold tracking-tight">Manhattan Gridiron</h3>
                                     <EscrowCountdown createdAt={new Date().toISOString()} />
                                 </div>
-                                <p className="text-xs text-gray-400">Friday, 8:00 PM (1 Hour)</p>
-                                <div className="mt-2 bg-dark-900 rounded p-3 border border-orange-500/30 flex justify-between items-center">
+                                <p className="text-xs text-gray-600">Friday, 8:00 PM (1 Hour)</p>
+                                <div className="mt-2 bg-gray-50 rounded p-3 border border-orange-500/30 flex justify-between items-center">
                                     <span className="text-xs text-gray-500 font-bold uppercase tracking-widest">Hold Status</span>
                                     <span className="text-orange-500 font-bold text-xs uppercase tracking-widest">Pending Split</span>
                                 </div>
@@ -106,8 +106,8 @@ export default function PlayerDashboard() {
                 )}
 
                 {activeTab === 'tournaments' && (
-                    <div className="bg-dark-900 border border-dark-700/50 p-8 rounded-3xl shadow-xl">
-                        <h2 className="text-xl text-white font-black uppercase mb-6 flex items-center gap-2"><Trophy className="text-primary-500" /> Active Tournaments</h2>
+                    <div className="bg-gray-50 border border-gray-300/50 p-8 rounded-3xl shadow-xl">
+                        <h2 className="text-xl text-gray-900 font-black uppercase mb-6 flex items-center gap-2"><Trophy className="text-emerald-700" /> Active Tournaments</h2>
                         {/* Static Representation of Active Injections */}
                         <div className="p-6 border border-dark-800 bg-dark-950 rounded-2xl text-center">
                             <p className="text-gray-500 text-sm font-bold uppercase tracking-widest">Registered brackets empty.</p>
@@ -117,16 +117,16 @@ export default function PlayerDashboard() {
 
                 {activeTab === 'resume' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <div className="bg-dark-900 border border-dark-700/50 p-8 rounded-3xl shadow-xl relative overflow-hidden">
+                        <div className="bg-gray-50 border border-gray-300/50 p-8 rounded-3xl shadow-xl relative overflow-hidden">
                             {stats?.vertical_jump_cm ? (
                                 <div className="absolute top-0 right-0 p-4">
                                     <span className="bg-green-500/20 text-green-400 border border-green-500/50 text-[10px] font-black uppercase px-3 py-1 rounded-full tracking-widest">Referee Verified</span>
                                 </div>
                             ) : null}
-                            <h2 className="text-xl text-white font-black uppercase mb-6 flex items-center gap-2"><Activity className="text-primary-500" /> Athletic Footprint</h2>
+                            <h2 className="text-xl text-gray-900 font-black uppercase mb-6 flex items-center gap-2"><Activity className="text-emerald-700" /> Athletic Footprint</h2>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div className="bg-dark-800 p-4 rounded-xl border border-dark-700 text-center"><p className="text-3xl font-black text-white">{stats?.forty_yard_dash_ms ? (stats.forty_yard_dash_ms / 1000).toFixed(2) : '--'}</p><p className="text-[10px] text-gray-400 uppercase tracking-widest mt-1">40-Yard (s)</p></div>
-                                <div className="bg-dark-800 p-4 rounded-xl border border-dark-700 text-center"><p className="text-3xl font-black text-primary-500">{stats?.vertical_jump_cm || '--'}</p><p className="text-[10px] text-gray-400 uppercase tracking-widest mt-1">Vert (cm)</p></div>
+                                <div className="bg-white p-4 rounded-xl border border-gray-300 text-center"><p className="text-3xl font-black text-gray-900">{stats?.forty_yard_dash_ms ? (stats.forty_yard_dash_ms / 1000).toFixed(2) : '--'}</p><p className="text-[10px] text-gray-600 uppercase tracking-widest mt-1">40-Yard (s)</p></div>
+                                <div className="bg-white p-4 rounded-xl border border-gray-300 text-center"><p className="text-3xl font-black text-emerald-700">{stats?.vertical_jump_cm || '--'}</p><p className="text-[10px] text-gray-600 uppercase tracking-widest mt-1">Vert (cm)</p></div>
                             </div>
                         </div>
                     </div>

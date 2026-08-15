@@ -26,7 +26,7 @@ export default function ProtectedRoute() {
     }, []);
 
     if (isAuthenticated === null) {
-        return <div className="min-h-screen bg-dark-900 flex justify-center items-center text-primary-500 font-bold">Verifying Secure Access...</div>;
+        return <div className="min-h-screen bg-gray-50 flex justify-center items-center text-emerald-700 font-bold">Verifying Secure Access...</div>;
     }
 
     return isAuthenticated ? <Outlet /> : <Navigate to="/" replace />;

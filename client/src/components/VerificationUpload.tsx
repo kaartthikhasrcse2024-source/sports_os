@@ -53,20 +53,20 @@ export default function VerificationUpload({ role }: { role: 'TURF_OWNER' | 'TOU
     };
 
     return (
-        <div className="bg-dark-800 p-6 rounded-2xl border border-dark-700 shadow-xl max-w-lg w-full">
-            <h2 className="text-xl font-black text-white mb-4">Identity Verification</h2>
-            <p className="text-gray-400 text-sm mb-6">You must upload your formal authentication documents to bypass constraints.</p>
+        <div className="bg-white p-6 rounded-2xl border border-gray-300 shadow-xl max-w-lg w-full">
+            <h2 className="text-xl font-black text-gray-900 mb-4">Identity Verification</h2>
+            <p className="text-gray-600 text-sm mb-6">You must upload your formal authentication documents to bypass constraints.</p>
 
             {error && <div className="text-red-400 text-xs font-bold mb-4 bg-red-900/30 p-3 rounded-lg border border-red-500/20">{error}</div>}
             {message && <div className="text-green-400 text-xs font-bold mb-4 bg-green-900/30 p-3 rounded-lg border border-green-500/20">{message}</div>}
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                    <label className="block text-gray-400 text-xs font-black uppercase mb-2">Document Type</label>
+                    <label className="block text-gray-600 text-xs font-black uppercase mb-2">Document Type</label>
                     <select
                         value={docType}
                         onChange={(e) => setDocType(e.target.value)}
-                        className="w-full bg-dark-900 border border-dark-700 rounded-xl p-3 text-white text-sm focus:border-primary-500 outline-none"
+                        className="w-full bg-gray-50 border border-gray-300 rounded-xl p-3 text-gray-900 text-sm focus:border-emerald-600 outline-none"
                     >
                         <option value="BUSINESS_TAX_ID">Business Tax ID</option>
                         <option value="GOVT_ID">Government ID</option>
@@ -76,23 +76,23 @@ export default function VerificationUpload({ role }: { role: 'TURF_OWNER' | 'TOU
                 </div>
 
                 <div>
-                    <label className="block text-gray-400 text-xs font-black uppercase mb-2">{role === 'TURF_OWNER' ? 'Tax ID' : 'Certification ID'}</label>
+                    <label className="block text-gray-600 text-xs font-black uppercase mb-2">{role === 'TURF_OWNER' ? 'Tax ID' : 'Certification ID'}</label>
                     <input
                         type="text"
                         value={certId}
                         onChange={(e) => setCertId(e.target.value)}
-                        className="w-full bg-dark-900 border border-dark-700 rounded-xl p-3 text-white text-sm focus:border-primary-500 outline-none"
+                        className="w-full bg-gray-50 border border-gray-300 rounded-xl p-3 text-gray-900 text-sm focus:border-emerald-600 outline-none"
                         placeholder="e.g. GSTIN / Certification #..."
                         required
                     />
                 </div>
 
                 <div>
-                    <label className="block text-gray-400 text-xs font-black uppercase mb-2">Upload Document (PDF/JPG)</label>
+                    <label className="block text-gray-600 text-xs font-black uppercase mb-2">Upload Document (PDF/JPG)</label>
                     <input
                         type="file"
                         onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
-                        className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-dark-700 file:text-white hover:file:bg-dark-600 transition-colors"
+                        className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-dark-700 file:text-gray-900 hover:file:bg-dark-600 transition-colors"
                         required
                     />
                 </div>
@@ -100,7 +100,7 @@ export default function VerificationUpload({ role }: { role: 'TURF_OWNER' | 'TOU
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-primary-500 hover:bg-primary-400 text-dark-900 font-black py-4 rounded-xl mt-4 uppercase tracking-widest text-xs transition-colors"
+                    className="w-full bg-emerald-600 hover:bg-emerald-600 text-dark-900 font-black py-4 rounded-xl mt-4 uppercase tracking-widest text-xs transition-colors"
                 >
                     {loading ? 'Transmitting Data...' : 'Submit Verification Pack'}
                 </button>

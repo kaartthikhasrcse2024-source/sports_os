@@ -1,0 +1,31 @@
+diff --git a/server/src/leases.ts b/server/src/leases.ts
+index 9f708c5..ef89496 100644
+--- a/server/src/leases.ts
++++ b/server/src/leases.ts
+@@ -3,7 +3,7 @@ import pool from './db';
+ 
+ const router = Router();
+ 
+-// PUT Profile Home Turf Alignment
++// PUT Profile My Home Base
+ router.put('/players/:id/home-turf', async (req, res) => {
+     const { id } = req.params;
+     const { facility_id } = req.body;
+@@ -53,7 +53,7 @@ router.get('/incoming', async (req, res) => {
+     }
+ });
+ 
+-// POST Venue Lease Matrix Request
++// POST Venue Rental Requests
+ router.post('/requests', async (req, res) => {
+     const { facility_id, organizer_id, requested_slots } = req.body;
+ 
+@@ -81,7 +81,7 @@ router.put('/requests/:id/:action', async (req, res) => {
+     const status = action.toUpperCase() + 'ED';
+ 
+     try {
+-        // Execute physical locking over the matrix
++        // Execute booking over the live court calendar
+         await pool.query('BEGIN');
+ 
+         const leaseResp = await pool.query(

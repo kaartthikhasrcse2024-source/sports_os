@@ -1,0 +1,26 @@
+◇ injected env (6) from ..\.env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+--- STARTING PAYMENT ECOSYSTEM TEST (RAZORPAY TEST MODE) ---
+
+[Setup] Resolving dummy turf, slot, and user...
+
+--- TEST SCENARIO A: CASUAL ENTRY BOOKING ---
+-> Hitting POST /create-order...
+[Success] Generated test Order ID: order_mock_1786784053036
+-> Confirming signature and distributing ledger logic...
+
+--- TEST SCENARIO B: 4-WAY SPLIT ESCROW (1200 TOTAL) ---
+[Setup] Generated 4 pending contribution escrow limits of ₹300 each... Slot HELD.
+
+-> Collecting Escrow Share 1/4...
+[Share 1] Booking Status: pending | Slot Status: held
+
+-> Collecting Escrow Share 2/4...
+[Share 2] Booking Status: pending | Slot Status: held
+
+-> Collecting Escrow Share 3/4...
+[Share 3] Booking Status: pending | Slot Status: held
+
+-> Collecting Escrow Share 4/4...
+Test script crashed: Error: API Error verify: {"error":"null value in column \"actor_id\" of relation \"transactions\" violates not-null constraint"}
+    at runTests (C:\Users\Karthika SR\sports_os\sports_os\server\scripts\test-payment-gateway.ts:126:35)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)

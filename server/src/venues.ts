@@ -30,7 +30,7 @@ router.get('/search', async (req, res) => {
         facilityFilters.push(`ST_Within(f.location, ${viewportPolygon})`);
         tournamentFilters.push(`ST_Within(f.location, ${viewportPolygon})`); // Tournaments infer bounds via their home facility
 
-        // 2. Optional Radius Extractor Matrix
+        // 2. Optional Nearby Turf Finder Radius
         if (radius_km && center_lat && center_lng) {
             const centerPoint = `ST_SetSRID(ST_Point(${Number(center_lng)}, ${Number(center_lat)}), 4326)`;
             const radiusMeters = Number(radius_km) * 1000;

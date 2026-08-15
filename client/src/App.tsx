@@ -15,6 +15,9 @@ import VerifyPhone from './components/VerifyPhone';
 import VerificationUpload from './components/VerificationUpload';
 import AdminApproval from './components/AdminApproval';
 import VenueMapDiscovery from './components/VenueMapDiscovery';
+import PlayerDiscovery from './pages/player/PlayerDiscovery';
+import SlotBooking from './pages/player/SlotBooking';
+import MockUserSelector from './components/common/MockUserSelector';
 import { useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
@@ -35,8 +38,9 @@ function App() {
   }, []);
 
   return (
-    <div className="pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] min-h-screen bg-dark-900">
+    <div className="pt-[calc(env(safe-area-inset-top)+48px)] pb-[env(safe-area-inset-bottom)] min-h-screen bg-gray-50">
       <Router>
+        <MockUserSelector />
         <Routes>
           {/* PUBLIC DOORS */}
           <Route path="/" element={<Landing />} />
@@ -58,6 +62,8 @@ function App() {
           <Route path="/dashboard" element={<DashboardSwitch />} />
           <Route path="/group-booking" element={<GroupBooking />} />
           <Route path="/map-search" element={<MapSearch />} />
+          <Route path="/discovery" element={<PlayerDiscovery />} />
+          <Route path="/slot-booking" element={<SlotBooking />} />
           <Route path="/bracket" element={<TournamentBracket />} />
           <Route path="/slots" element={<SlotGrid />} />
           <Route path="/referee" element={<RefereeScorecard />} />

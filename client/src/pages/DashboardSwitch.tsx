@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../supabase';
-import { useNavigate } from 'react-router-dom';
 import PlayerDashboard from './PlayerDashboard';
-import TurfOwnerDashboard from './TurfOwnerDashboard';
+import TurfOwnerDashboard from './owner/TurfOwnerDashboard';
 import OrganizerDashboard from './OrganizerDashboard';
+import { useNavigate } from 'react-router-dom';
 
 export default function DashboardSwitch() {
     const [role, setRole] = useState<'PLAYER' | 'TURF_OWNER' | 'TOURNAMENT_ORGANIZER' | null>(null);
@@ -51,8 +51,8 @@ export default function DashboardSwitch() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-dark-900 flex items-center justify-center">
-                <div className="text-primary-500 text-xl font-black uppercase tracking-widest animate-pulse">Initializing Identity...</div>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-emerald-700 text-xl font-black uppercase tracking-widest animate-pulse">Initializing Identity...</div>
             </div>
         );
     }

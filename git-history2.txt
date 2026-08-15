@@ -1,0 +1,7 @@
+0e013ca feat: Implement 3 Actor Dashboards, Dev Mode Bypass, and Postgres Lease integrations
+3dacda4 athelete
+9e8595f UI: Add dashboard layout, Tailwind v4 fixes, and player profile fallback
+70da2db Complete Sports OS setup, Google OAuth enabled, and route styling verified
+389ed07 branch final
+4698d3c final commit before demo look up
+8a95888 feat: complete full-stack sports OS modules 1-8, SQL migrations, and deployment config

@@ -1,0 +1,13 @@
+diff --git a/client/src/App.tsx b/client/src/App.tsx
+index bd68c3f..1bbc5c1 100644
+--- a/client/src/App.tsx
++++ b/client/src/App.tsx
+@@ -35,7 +35,7 @@ function App() {
+   }, []);
+ 
+   return (
+-    <div className="pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] min-h-screen bg-dark-900">
++    <div className="pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] min-h-screen bg-slate-50">
+       <Router>
+         <Routes>
+           {/* PUBLIC DOORS */}

@@ -17,7 +17,7 @@ router.post('/', requireVerifiedRole(['TOURNAMENT_ORGANIZER']), async (req, res)
     } catch (e: any) { res.status(500).json({ error: e.message }); }
 });
 
-// Create Team Registration
+// Team Sign-Up & Entry
 router.post('/:id/teams', async (req, res) => {
     const { team_name } = req.body;
     const { id } = req.params;

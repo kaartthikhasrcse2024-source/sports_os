@@ -3,8 +3,22 @@ import pool from './db';
 
 const router = Router();
 
+router.put('/matches/:id/bind', async (req, res) => {
+    const { id } = req.params;
+    const { referee_id } = req.body;
+    try {
+        const result = await pool.query(
+            `UPDATE bracket_matches SET referee_id = $1 WHERE id = $2 RETURNING *`,
+            [referee_id, id]
+        );
+        res.json({ success: true, match: result.rows[0] });
+    } catch (e: any) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // Handle secure submission natively mapping aggregate checks generating final winner_id
-router.post('/matches/:id/scorecard', async (req, res) => {
+router.post('/matches/:id/live-match-scorecard', async (req, res) => {
     const { id } = req.params;
     const { referee_id, stats } = req.body;
     // Secure checking mapped constraints strictly

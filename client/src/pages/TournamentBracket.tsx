@@ -46,9 +46,9 @@ export default function TournamentBracket() {
 
     if (!tournament) {
         return (
-            <div className="h-screen bg-dark-900 text-white flex flex-col items-center justify-center">
+            <div className="h-screen bg-gray-50 text-gray-900 flex flex-col items-center justify-center">
                 <h1 className="text-3xl font-bold mb-4">Tournament Module Dashboard</h1>
-                <button onClick={initDemoTournament} className="bg-primary-500 text-dark-900 px-6 py-3 font-bold uppercase tracking-wider rounded">Seed 8-Team Demo Tournament</button>
+                <button onClick={initDemoTournament} className="bg-emerald-600 text-dark-900 px-6 py-3 font-bold uppercase tracking-wider rounded">Seed 8-Team Demo Tournament</button>
             </div>
         );
     }
@@ -58,18 +58,18 @@ export default function TournamentBracket() {
     const getTeamName = (tid: string) => data.teams.find(t => t.id === tid)?.team_name || 'TBD';
 
     return (
-        <div className="min-h-screen bg-dark-900 text-white p-8 overflow-x-auto overflow-y-auto">
-            <h1 className="text-2xl text-primary-500 font-bold mb-8">Admin View: {tournament.name}</h1>
+        <div className="min-h-screen bg-gray-50 text-gray-900 p-8 overflow-x-auto overflow-y-auto">
+            <h1 className="text-2xl text-emerald-700 font-bold mb-8">Admin View: {tournament.name}</h1>
 
             <div className="flex gap-16 min-w-max">
                 {rounds.map(r => (
                     <div key={r} className="flex flex-col justify-around gap-8 relative select-none">
                         <div className="text-center font-bold text-gray-500 absolute -top-8 w-full uppercase">Round {r}</div>
                         {data.matches.filter((m: any) => m.round === r).map((m: any) => (
-                            <div key={m.id} className="w-56 bg-dark-800 border-2 border-dark-700 rounded overflow-hidden flex flex-col relative" style={{ minHeight: '80px' }}>
+                            <div key={m.id} className="w-56 bg-white border-2 border-gray-300 rounded overflow-hidden flex flex-col relative" style={{ minHeight: '80px' }}>
 
                                 {/* Team A */}
-                                <div className={`p-2 flex justify-between items-center cursor-pointer hover:bg-dark-700 transition ${m.winner_id === m.team_a_id ? 'bg-primary-500/20 text-primary-400' : ''}`}
+                                <div className={`p-2 flex justify-between items-center cursor-pointer hover:bg-dark-700 transition ${m.winner_id === m.team_a_id ? 'bg-emerald-600/20 text-emerald-700' : ''}`}
                                     onClick={() => { if (m.team_a_id) setWinner(m.id, m.team_a_id); }}>
                                     <span className="font-semibold">{m.team_a_id ? getTeamName(m.team_a_id) : 'TBD'}</span>
                                     {m.winner_id === m.team_a_id && <span>🏆</span>}
@@ -79,7 +79,7 @@ export default function TournamentBracket() {
                                 <div className="h-px bg-dark-700 w-full" />
 
                                 {/* Team B */}
-                                <div className={`p-2 flex justify-between items-center cursor-pointer hover:bg-dark-700 transition ${m.winner_id === m.team_b_id ? 'bg-primary-500/20 text-primary-400' : ''}`}
+                                <div className={`p-2 flex justify-between items-center cursor-pointer hover:bg-dark-700 transition ${m.winner_id === m.team_b_id ? 'bg-emerald-600/20 text-emerald-700' : ''}`}
                                     onClick={() => { if (m.team_b_id) setWinner(m.id, m.team_b_id); }}>
                                     <span className="font-semibold">{m.team_b_id ? getTeamName(m.team_b_id) : 'TBD'}</span>
                                     {m.winner_id === m.team_b_id && <span>🏆</span>}
@@ -96,8 +96,8 @@ export default function TournamentBracket() {
                     if (finalMatch?.winner_id) {
                         return (
                             <div className="flex flex-col justify-center gap-8 relative select-none">
-                                <div className="text-center font-bold text-primary-500 absolute -top-8 w-full uppercase animate-pulse">CHAMPION</div>
-                                <div className="w-56 bg-primary-500 text-dark-900 border-2 border-primary-500 rounded p-4 flex flex-col relative items-center shadow-[0_0_25px_rgba(234,179,8,0.5)] font-black text-xl text-center">
+                                <div className="text-center font-bold text-emerald-700 absolute -top-8 w-full uppercase animate-pulse">CHAMPION</div>
+                                <div className="w-56 bg-emerald-600 text-dark-900 border-2 border-emerald-600 rounded p-4 flex flex-col relative items-center shadow-[0_0_25px_rgba(234,179,8,0.5)] font-black text-xl text-center">
                                     🏆<br />{getTeamName(finalMatch.winner_id)}
                                 </div>
                             </div>

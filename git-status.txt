@@ -1,0 +1,68 @@
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   client/src/App.tsx
+	modified:   client/src/components/AdminApproval.tsx
+	modified:   client/src/components/ProtectedRoute.tsx
+	modified:   client/src/components/VenueMapDiscovery.tsx
+	modified:   client/src/components/VerificationUpload.tsx
+	modified:   client/src/components/VerifyPhone.tsx
+	modified:   client/src/index.css
+	modified:   client/src/pages/DashboardSwitch.tsx
+	modified:   client/src/pages/FreeAgents.tsx
+	modified:   client/src/pages/GroupBooking.tsx
+	modified:   client/src/pages/Landing.tsx
+	modified:   client/src/pages/Login.tsx
+	modified:   client/src/pages/MapSearch.tsx
+	modified:   client/src/pages/OrganizerAuth.tsx
+	modified:   client/src/pages/OrganizerDashboard.tsx
+	modified:   client/src/pages/OwnerAuth.tsx
+	modified:   client/src/pages/PlayerAuth.tsx
+	deleted:    client/src/pages/PlayerDashboard.tsx
+	modified:   client/src/pages/PlayerProfile.tsx
+	modified:   client/src/pages/RefereeScorecard.tsx
+	modified:   client/src/pages/Signup.tsx
+	modified:   client/src/pages/SlotGrid.tsx
+	modified:   client/src/pages/TournamentBracket.tsx
+	modified:   client/src/pages/TurfOwnerDashboard.tsx
+	modified:   client/src/supabase.ts
+	modified:   scripts/e2e-smoke-test.ts
+	modified:   server/src/auth.ts
+	modified:   server/src/facilities.ts
+	modified:   server/src/leases.ts
+	modified:   server/src/player.ts
+	modified:   server/src/players.ts
+	modified:   server/src/referees.ts
+	modified:   server/src/scout.ts
+	modified:   server/src/tournaments.ts
+	modified:   server/src/venues.ts
+	modified:   server/test/referee-test.ts
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	DESIGN_SYSTEM.md
+	check-db.ts
+	client/build_errors.txt
+	client/build_output.txt
+	client/src/components/BottomNav.tsx
+	client/src/pages/player/
+	git-history.txt
+	git-history2.txt
+	git-status.txt
+	out-ref.txt
+	out.txt
+	scripts/out-e2e.txt
+	server/check-col.js
+	server/check-db.js
+	server/cols.json
+	server/cols.txt
+	server/err.json
+	server/scout-err.txt
+	server/tables.txt
+	server/test-leases.js
+	server/test-scout.js
+
+no changes added to commit (use "git add" and/or "git commit -a")

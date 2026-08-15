@@ -1,0 +1,28 @@
+◇ injected env (6) from ..\.env // tip: ◈ encrypted .env [www.dotenvx.com]
+--- STARTING SPORTS OS SEEDING ---
+Seeding Turf Owners...
+Seeding Tournament Organizers...
+Seeding Players...
+Seeding Slots & Transactions...
+SEEDING FAILED: error: invalid input value for enum transaction_type: "VENUE_LEASE"
+    at C:\Users\Karthika SR\sports_os\sports_os\server\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async main (C:\Users\Karthika SR\sports_os\sports_os\server\src\seed.ts:131:9) {
+  length: 115,
+  severity: 'ERROR',
+  code: '22P02',
+  detail: undefined,
+  hint: undefined,
+  position: '136',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'enum.c',
+  line: '129',
+  routine: 'enum_in'
+}

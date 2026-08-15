@@ -1,0 +1,4 @@
+src/components/NavigationTabs.tsx(1,10): error TS1484: 'Dispatch' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/components/NavigationTabs.tsx(1,20): error TS1484: 'SetStateAction' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/components/ProtectedRoute.tsx(17,80): error TS6133: 'session' is declared but its value is never read.
+src/pages/PlayerDashboard.tsx(5,26): error TS1484: 'TabType' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.

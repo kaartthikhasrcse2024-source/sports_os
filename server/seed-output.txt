@@ -1,0 +1,28 @@
+◇ injected env (6) from ..\.env // tip: ⌁ auth for agents [www.vestauth.com]
+--- STARTING SPORTS OS SEEDING ---
+Seeding Turf Owners...
+Seeding Tournament Organizers...
+Seeding Players...
+Seeding Slots & Transactions...
+SEEDING FAILED: error: relation "escrow_contributions" does not exist
+    at C:\Users\Karthika SR\sports_os\sports_os\server\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async main (C:\Users\Karthika SR\sports_os\sports_os\server\src\seed.ts:110:9) {
+  length: 119,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '13',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}

@@ -1,0 +1,24 @@
+diff --git a/client/src/pages/DashboardSwitch.tsx b/client/src/pages/DashboardSwitch.tsx
+index 34b1625..e56dd0c 100644
+--- a/client/src/pages/DashboardSwitch.tsx
++++ b/client/src/pages/DashboardSwitch.tsx
+@@ -1,7 +1,7 @@
+ import { useEffect, useState } from 'react';
+ import { supabase } from '../supabase';
+ import { useNavigate } from 'react-router-dom';
+-import PlayerDashboard from './PlayerDashboard';
++import PlayerDashboard from './player/PlayerDashboard';
+ import TurfOwnerDashboard from './TurfOwnerDashboard';
+ import OrganizerDashboard from './OrganizerDashboard';
+ 
+@@ -51,8 +51,8 @@ export default function DashboardSwitch() {
+ 
+     if (loading) {
+         return (
+-            <div className="min-h-screen bg-dark-900 flex items-center justify-center">
+-                <div className="text-primary-500 text-xl font-black uppercase tracking-widest animate-pulse">Initializing Identity...</div>
++            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
++                <div className="text-primary-500 text-xl font-bold uppercase tracking-widest animate-pulse">Initializing Identity...</div>
+             </div>
+         );
+     }

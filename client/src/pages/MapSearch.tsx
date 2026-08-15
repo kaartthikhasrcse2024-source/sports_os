@@ -71,18 +71,18 @@ export default function MapSearch() {
     }, [location, radius, tagFilter]);
 
     return (
-        <div className="h-screen flex flex-col bg-dark-900 text-white">
-            <div className="p-4 bg-dark-800 border-b border-dark-700 flex flex-wrap gap-4 items-center">
-                <h1 className="text-xl font-bold text-primary-500 mr-4">Near Me</h1>
+        <div className="h-screen flex flex-col bg-gray-50 text-gray-900">
+            <div className="p-4 bg-white border-b border-gray-300 flex flex-wrap gap-4 items-center">
+                <h1 className="text-xl font-bold text-emerald-700 mr-4">Near Me</h1>
 
                 <div className="flex items-center gap-2">
-                    <label className="text-sm text-gray-400">Radius: {radius}km</label>
+                    <label className="text-sm text-gray-600">Radius: {radius}km</label>
                     <input type="range" min="1" max="50" value={radius} onChange={e => setRadius(Number(e.target.value))} className="accent-primary-500" />
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <label className="text-sm text-gray-400">Filter:</label>
-                    <select value={tagFilter} onChange={e => setTagFilter(e.target.value)} className="bg-dark-900 border border-dark-700 rounded px-2 py-1 text-sm">
+                    <label className="text-sm text-gray-600">Filter:</label>
+                    <select value={tagFilter} onChange={e => setTagFilter(e.target.value)} className="bg-gray-50 border border-gray-300 rounded px-2 py-1 text-sm">
                         <option value="">All Amenities</option>
                         <option value="turf">Turf</option>
                         <option value="clay">Clay Court</option>
@@ -96,16 +96,16 @@ export default function MapSearch() {
 
             <div className="flex-1 flex overflow-hidden">
                 {/* Sidebar List */}
-                <div className="w-1/3 p-4 overflow-y-auto bg-dark-900 border-r border-dark-800">
+                <div className="w-1/3 p-4 overflow-y-auto bg-gray-50 border-r border-dark-800">
                     <h2 className="text-lg font-semibold mb-4">{facilities.length} Venues Found</h2>
                     {facilities.map(f => (
-                        <div key={f.id} className="p-4 mb-3 bg-dark-800 rounded border border-dark-700 hover:border-primary-500 cursor-pointer transition-colors">
-                            <h3 className="font-bold text-primary-400">{f.name}</h3>
-                            <p className="text-sm text-gray-400 mt-1">{f.address}</p>
+                        <div key={f.id} className="p-4 mb-3 bg-white rounded border border-gray-300 hover:border-emerald-600 cursor-pointer transition-colors">
+                            <h3 className="font-bold text-emerald-700">{f.name}</h3>
+                            <p className="text-sm text-gray-600 mt-1">{f.address}</p>
                             <div className="mt-2 flex flex-wrap gap-1">
-                                {f.tags?.map((t: string) => <span key={t} className="text-xs bg-dark-700 px-2 py-1 rounded text-gray-300">{t}</span>)}
+                                {f.tags?.map((t: string) => <span key={t} className="text-xs bg-dark-700 px-2 py-1 rounded text-gray-700">{t}</span>)}
                             </div>
-                            <div className="mt-3 text-sm text-gray-300 font-semibold">{Number(f.distance_meters / 1000).toFixed(1)} km away</div>
+                            <div className="mt-3 text-sm text-gray-700 font-semibold">{Number(f.distance_meters / 1000).toFixed(1)} km away</div>
                         </div>
                     ))}
                     {facilities.length === 0 && !loading && <div className="text-gray-500 text-sm">No facilities within threshold constraint. Change filters.</div>}
@@ -136,7 +136,7 @@ export default function MapSearch() {
                             ))}
                         </MapContainer>
                     ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-dark-800 text-gray-500">
+                        <div className="w-full h-full flex items-center justify-center bg-white text-gray-500">
                             Locating you securely...
                         </div>
                     )}

@@ -50,9 +50,9 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-dark-900 border-t-4 border-primary-500">
-            <div className="bg-dark-800 p-8 rounded-lg shadow-2xl max-w-md w-full border border-dark-700">
-                <h2 className="text-3xl font-bold text-white mb-6 text-center">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 border-t-4 border-emerald-600">
+            <div className="bg-white p-8 rounded-lg shadow-2xl max-w-md w-full border border-gray-300">
+                <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
                     Login
                 </h2>
 
@@ -64,29 +64,29 @@ export default function Login() {
 
                 <form onSubmit={handleLogin} className="space-y-4">
                     <div>
-                        <label className="block text-gray-400 text-sm mb-1">Email</label>
+                        <label className="block text-gray-600 text-sm mb-1">Email</label>
                         <input
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full bg-dark-900 border border-dark-700 rounded p-2 text-white focus:outline-none focus:border-primary-500 transition-colors"
+                            className="w-full bg-gray-50 border border-gray-300 rounded p-2 text-gray-900 focus:outline-none focus:border-emerald-600 transition-colors"
                             required
                         />
                     </div>
                     <div>
-                        <label className="block text-gray-400 text-sm mb-1">Password</label>
+                        <label className="block text-gray-600 text-sm mb-1">Password</label>
                         <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full bg-dark-900 border border-dark-700 rounded p-2 text-white focus:outline-none focus:border-primary-500 transition-colors"
+                            className="w-full bg-gray-50 border border-gray-300 rounded p-2 text-gray-900 focus:outline-none focus:border-emerald-600 transition-colors"
                             required
                         />
                     </div>
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-primary-500 hover:bg-primary-400 text-dark-900 font-bold py-2 px-4 rounded transition-colors"
+                        className="w-full bg-emerald-600 hover:bg-emerald-600 text-dark-900 font-bold py-2 px-4 rounded transition-colors"
                     >
                         {loading ? 'Logging in...' : 'Login'}
                     </button>
@@ -108,7 +108,7 @@ export default function Login() {
                 </div>
 
                 <p className="mt-4 text-center text-sm text-gray-500">
-                    Don't have an account? <Link to="/signup" className="text-primary-500 hover:underline">Sign up</Link>
+                    Don't have an account? <Link to="/signup" className="text-emerald-700 hover:underline">Sign up</Link>
                 </p>
             </div>
         </div>

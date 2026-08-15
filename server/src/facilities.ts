@@ -5,8 +5,34 @@ import { requireVerifiedRole } from './auth';
 const router = Router();
 
 router.post('/', requireVerifiedRole(['TURF_OWNER']), async (req: Request, res: Response) => {
-    // Scaffold functionality protected by strict verification guard
-    res.json({ success: true, message: 'Facility creation executed physically against boundaries.' });
+    const user = (req as any).user;
+    const { name, address, lat, lng, is_outdoor, tags } = req.body;
+
+    if (!name || !lat || !lng) {
+        res.status(400).json({ error: 'Missing required boundary fields: name, lat, lng' });
+        return;
+    }
+
+    try {
+        const pointWKT = `POINT(${lng} ${lat})`;
+        const result = await pool.query(
+            `INSERT INTO facilities (name, address, owner_id, lat, lng, location, is_outdoor, tags)
+             VALUES ($1, $2, $3, $4, $5, ST_GeomFromText($6, 4326), $7, $8)
+             RETURNING *`,
+            [name, address, user.sub || user.id, lat, lng, pointWKT, is_outdoor || false, JSON.stringify(tags || {})]
+        );
+        res.json({ success: true, facility: result.rows[0] });
+    } catch (e: any) {
+        console.error('Facility Creation Error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+router.get('/', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM facilities ORDER BY name ASC');
+        res.json(result.rows);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
 });
 
 router.get('/nearby', async (req: Request, res: Response) => {

@@ -159,8 +159,8 @@ router.post('/group-reserve', requireAuth, async (req, res) => {
 
         await client.query('COMMIT');
 
-        // Schedule cleanup after 30 seconds
-        await groupBookingQueue.add('checkGroupPayment', { booking_id }, { delay: 30000 });
+        // Schedule cleanup after 15 minutes (split escrow timeout)
+        await groupBookingQueue.add('checkGroupPayment', { booking_id }, { delay: 15 * 60 * 1000 });
 
         res.status(201).json({
             booking_id

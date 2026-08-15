@@ -1,0 +1,26 @@
+◇ injected env (6) from ..\.env // tip: ⌘ enable debugging { debug: true }
+--- STARTING PAYMENT ECOSYSTEM TEST (RAZORPAY TEST MODE) ---
+
+[Setup] Resolving dummy turf, slot, and user...
+Test script crashed: error: insert or update on table "facilities" violates foreign key constraint "facilities_owner_id_fkey"
+    at C:\Users\Karthika SR\sports_os\sports_os\server\node_modules\pg\lib\client.js:652:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async runTests (C:\Users\Karthika SR\sports_os\sports_os\server\scripts\test-payment-gateway.ts:41:9) {
+  length: 300,
+  severity: 'ERROR',
+  code: '23503',
+  detail: 'Key (owner_id)=(11111111-0000-0000-0000-111111111111) is not present in table "users".',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'facilities',
+  column: undefined,
+  dataType: undefined,
+  constraint: 'facilities_owner_id_fkey',
+  file: 'ri_triggers.c',
+  line: '2599',
+  routine: 'ri_ReportViolation'
+}

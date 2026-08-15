@@ -33,7 +33,23 @@ router.post('/register-turf', async (req, res) => {
         if (!facility_id) return res.status(400).json({ error: 'facility_id required' });
 
         await pool.query(`UPDATE profiles SET home_turf_id = $1 WHERE id = $2`, [facility_id, playerId]);
-        res.json({ success: true, message: 'Home turf registered successfully' });
+        res.json({ success: true, message: 'My Home Base registered successfully' });
+    } catch (e: any) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+router.post('/register-home-turf', async (req, res) => {
+    try {
+        const { playerId, venueId } = req.body;
+        if (!playerId || !venueId) return res.status(400).json({ error: 'playerId and venueId required' });
+
+        // Update the database record if the profile exists (ignoring auth for mockup).
+        // Since we are mocking the other players, we might just return success if it's purely a mockup,
+        // but let's try updating it if it's connected to DB profiles, otherwise just return success.
+        await pool.query(`UPDATE profiles SET home_turf_id = $1 WHERE id = $2`, [venueId, playerId]);
+
+        res.json({ success: true, message: 'Home Turf registered successfully for ' + playerId });
     } catch (e: any) {
         res.status(500).json({ error: e.message });
     }

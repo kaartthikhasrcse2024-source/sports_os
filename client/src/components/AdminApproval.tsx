@@ -49,29 +49,29 @@ export default function AdminApproval() {
         }
     };
 
-    if (loading) return <div className="text-white text-center p-10 font-bold uppercase tracking-widest text-xs">Loading Security Constraints...</div>;
+    if (loading) return <div className="text-gray-900 text-center p-10 font-bold uppercase tracking-widest text-xs">Loading Security Constraints...</div>;
 
-    if (pendingDocs.length === 0) return <div className="bg-dark-800 p-8 rounded-2xl border border-dark-700 shadow-xl text-center text-gray-400 font-bold uppercase text-xs tracking-widest">No Pending Clearances</div>;
+    if (pendingDocs.length === 0) return <div className="bg-white p-8 rounded-2xl border border-gray-300 shadow-xl text-center text-gray-600 font-bold uppercase text-xs tracking-widest">No Pending Clearances</div>;
 
     return (
-        <div className="bg-dark-800 p-6 rounded-2xl border border-red-900/50 shadow-2xl max-w-4xl w-full">
+        <div className="bg-white p-6 rounded-2xl border border-red-900/50 shadow-2xl max-w-4xl w-full">
             <h2 className="text-xl font-black text-red-500 mb-6 flex items-center gap-2 uppercase tracking-tighter">
                 <ShieldCheck /> Security Clearance Bay
             </h2>
             <div className="space-y-4">
                 {pendingDocs.map(doc => (
-                    <div key={doc.id} className="bg-dark-900 border border-dark-700 p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div key={doc.id} className="bg-gray-50 border border-gray-300 p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
                             <div className="flex items-center gap-2 mb-1">
-                                <span className="font-bold text-white uppercase text-sm tracking-wide">{doc.name}</span>
-                                <span className="text-[10px] font-black px-2 py-1 bg-dark-700 text-gray-300 rounded uppercase tracking-widest">{doc.actor_role}</span>
+                                <span className="font-bold text-gray-900 uppercase text-sm tracking-wide">{doc.name}</span>
+                                <span className="text-[10px] font-black px-2 py-1 bg-dark-700 text-gray-700 rounded uppercase tracking-widest">{doc.actor_role}</span>
                             </div>
-                            <p className="text-xs text-gray-400 mb-2 font-medium">{doc.email}</p>
+                            <p className="text-xs text-gray-600 mb-2 font-medium">{doc.email}</p>
 
                             <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                                <div><span className="text-gray-500 font-bold uppercase">Type:</span> <span className="text-primary-400 font-bold">{doc.document_type}</span></div>
-                                {doc.business_tax_id && <div><span className="text-gray-500 font-bold uppercase">Tax ID:</span> <span className="text-white font-mono">{doc.business_tax_id}</span></div>}
-                                {doc.organizer_cert_id && <div><span className="text-gray-500 font-bold uppercase">Cert:</span> <span className="text-white font-mono">{doc.organizer_cert_id}</span></div>}
+                                <div><span className="text-gray-500 font-bold uppercase">Type:</span> <span className="text-emerald-700 font-bold">{doc.document_type}</span></div>
+                                {doc.business_tax_id && <div><span className="text-gray-500 font-bold uppercase">Tax ID:</span> <span className="text-gray-900 font-mono">{doc.business_tax_id}</span></div>}
+                                {doc.organizer_cert_id && <div><span className="text-gray-500 font-bold uppercase">Cert:</span> <span className="text-gray-900 font-mono">{doc.organizer_cert_id}</span></div>}
                             </div>
                         </div>
 
@@ -80,7 +80,7 @@ export default function AdminApproval() {
                                 href={doc.file_url}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="block text-center bg-dark-700 hover:bg-dark-600 text-white font-bold text-xs uppercase tracking-widest py-2 px-4 rounded transition-colors"
+                                className="block text-center bg-dark-700 hover:bg-dark-600 text-gray-900 font-bold text-xs uppercase tracking-widest py-2 px-4 rounded transition-colors"
                             >
                                 View Payload
                             </a>
@@ -93,7 +93,7 @@ export default function AdminApproval() {
                                 </button>
                                 <button
                                     onClick={() => executeDecision(doc.profile_id, doc.id, 'REJECTED')}
-                                    className="flex-1 bg-red-500 hover:bg-red-400 text-white font-black uppercase text-xs py-2 px-4 rounded transition-colors flex items-center justify-center"
+                                    className="flex-1 bg-red-500 hover:bg-red-400 text-gray-900 font-black uppercase text-xs py-2 px-4 rounded transition-colors flex items-center justify-center"
                                 >
                                     <XCircle size={16} />
                                 </button>

@@ -149,16 +149,16 @@ export default function VenueMapDiscovery() {
     };
 
     return (
-        <div className="flex flex-col md:flex-row h-[85vh] bg-dark-900 border border-dark-700 rounded-2xl overflow-hidden relative shadow-2xl mt-4">
+        <div className="flex flex-col md:flex-row h-[85vh] bg-gray-50 border border-gray-300 rounded-2xl overflow-hidden relative shadow-2xl mt-4">
 
             {/* Control Dashboard Overlay */}
-            <div className="w-full md:w-96 bg-dark-800 p-6 flex flex-col gap-6 overflow-y-auto border-r border-dark-700 z-[1000]">
+            <div className="w-full md:w-96 bg-white p-6 flex flex-col gap-6 overflow-y-auto border-r border-gray-300 z-[1000]">
                 <div>
-                    <h2 className="text-xl font-black text-white uppercase tracking-tighter flex items-center gap-2 mb-2">
-                        <Map size={24} className="text-primary-500" />
+                    <h2 className="text-xl font-black text-gray-900 uppercase tracking-tighter flex items-center gap-2 mb-2">
+                        <Map size={24} className="text-emerald-700" />
                         Discovery Matrix
                     </h2>
-                    <p className="text-xs text-gray-400 font-bold tracking-widest uppercase">Target your local battlefield</p>
+                    <p className="text-xs text-gray-600 font-bold tracking-widest uppercase">Target your local battlefield</p>
                 </div>
 
                 <form onSubmit={searchNominatim} className="relative flex">
@@ -167,15 +167,15 @@ export default function VenueMapDiscovery() {
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
                         placeholder="Search City or Zone..."
-                        className="w-full bg-dark-900 border border-dark-700 rounded-l-xl p-4 text-white text-sm focus:border-primary-500 outline-none"
+                        className="w-full bg-gray-50 border border-gray-300 rounded-l-xl p-4 text-gray-900 text-sm focus:border-emerald-600 outline-none"
                     />
-                    <button type="submit" className="bg-primary-500 px-4 rounded-r-xl text-black hover:bg-primary-400">
+                    <button type="submit" className="bg-emerald-600 px-4 rounded-r-xl text-black hover:bg-emerald-600">
                         <Search size={18} />
                     </button>
                     <button
                         type="button"
                         onClick={captureUserGeolocation}
-                        className="absolute right-[4rem] top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                        className="absolute right-[4rem] top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-900 transition-colors"
                         title="Locate Me"
                     >
                         <LocateFixed size={18} />
@@ -183,14 +183,14 @@ export default function VenueMapDiscovery() {
                 </form>
 
                 <div className="space-y-4">
-                    <h3 className="text-xs text-gray-500 font-black tracking-widest uppercase border-b border-dark-700 pb-2">Operational Filters</h3>
+                    <h3 className="text-xs text-gray-500 font-black tracking-widest uppercase border-b border-gray-300 pb-2">Operational Filters</h3>
 
                     <div>
-                        <label className="text-xs font-bold text-gray-400 mb-1 block">Sport Type</label>
+                        <label className="text-xs font-bold text-gray-600 mb-1 block">Sport Type</label>
                         <select
                             value={sport}
                             onChange={(e) => setSport(e.target.value)}
-                            className="w-full bg-dark-900 border border-dark-700 rounded-xl p-3 text-white text-sm focus:border-primary-500 outline-none"
+                            className="w-full bg-gray-50 border border-gray-300 rounded-xl p-3 text-gray-900 text-sm focus:border-emerald-600 outline-none"
                         >
                             <option value="">Any Sport</option>
                             <option value="futsal">Futsal</option>
@@ -201,9 +201,9 @@ export default function VenueMapDiscovery() {
                     </div>
 
                     <div>
-                        <label className="text-xs font-bold text-gray-400 mb-1 flex justify-between">
+                        <label className="text-xs font-bold text-gray-600 mb-1 flex justify-between">
                             <span>Radius Constraint</span>
-                            <span className="text-primary-500">{radius ? `${radius} km` : 'Worldwide'}</span>
+                            <span className="text-emerald-700">{radius ? `${radius} km` : 'Worldwide'}</span>
                         </label>
                         <input
                             type="range" min="1" max="100"
@@ -214,22 +214,22 @@ export default function VenueMapDiscovery() {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="text-xs font-bold text-gray-400 mb-1 block">Min Rate</label>
+                            <label className="text-xs font-bold text-gray-600 mb-1 block">Min Rate</label>
                             <div className="relative">
                                 <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
                                 <input
                                     type="number" value={minPrice} onChange={e => setMinPrice(Number(e.target.value))}
-                                    className="w-full bg-dark-900 border border-dark-700 rounded-xl p-2 pl-8 text-white text-sm"
+                                    className="w-full bg-gray-50 border border-gray-300 rounded-xl p-2 pl-8 text-gray-900 text-sm"
                                 />
                             </div>
                         </div>
                         <div>
-                            <label className="text-xs font-bold text-gray-400 mb-1 block">Max Rate</label>
+                            <label className="text-xs font-bold text-gray-600 mb-1 block">Max Rate</label>
                             <div className="relative">
                                 <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
                                 <input
                                     type="number" value={maxPrice} onChange={e => setMaxPrice(Number(e.target.value))}
-                                    className="w-full bg-dark-900 border border-dark-700 rounded-xl p-2 pl-8 text-white text-sm"
+                                    className="w-full bg-gray-50 border border-gray-300 rounded-xl p-2 pl-8 text-gray-900 text-sm"
                                 />
                             </div>
                         </div>
@@ -237,17 +237,17 @@ export default function VenueMapDiscovery() {
                 </div>
 
                 <div className="mt-auto">
-                    <div className="flex flex-col gap-2 p-4 bg-dark-900 rounded-xl border border-dark-700 border-dashed">
+                    <div className="flex flex-col gap-2 p-4 bg-gray-50 rounded-xl border border-gray-300 border-dashed">
                         <div className="flex items-center gap-3">
                             <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                            <span className="text-xs text-gray-400 font-bold uppercase tracking-wide">Available Turfs</span>
+                            <span className="text-xs text-gray-600 font-bold uppercase tracking-wide">Available Turfs</span>
                         </div>
                         <div className="flex items-center gap-3">
                             <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                            <span className="text-xs text-gray-400 font-bold uppercase tracking-wide">Active Tournaments</span>
+                            <span className="text-xs text-gray-600 font-bold uppercase tracking-wide">Active Tournaments</span>
                         </div>
                     </div>
-                    {loading && <div className="text-[10px] text-primary-500 font-black tracking-widest text-center mt-4 animate-pulse">Syncing Geography...</div>}
+                    {loading && <div className="text-[10px] text-emerald-700 font-black tracking-widest text-center mt-4 animate-pulse">Syncing Geography...</div>}
                 </div>
             </div>
 
@@ -299,7 +299,7 @@ export default function VenueMapDiscovery() {
                                         </div>
 
                                         <a href={node.type === 'TURF' ? `/facility/${node.id}` : `/tournament/${node.id}`}
-                                            className="block text-center w-full bg-gray-900 hover:bg-gray-800 text-white font-bold py-2 rounded-lg text-xs uppercase tracking-widest transition-colors">
+                                            className="block text-center w-full bg-gray-900 hover:bg-gray-800 text-gray-900 font-bold py-2 rounded-lg text-xs uppercase tracking-widest transition-colors">
                                             {node.type === 'TURF' ? 'Book Slot' : 'View Tournament'}
                                         </a>
                                     </div>

@@ -87,8 +87,14 @@ app.use('/api/v1/verification', verificationRoutes);
 import venueRoutes from './venues';
 app.use('/api/v1/venues', venueRoutes);
 
+import escrowRoutes from './escrow';
+app.use('/api/v1/escrow', escrowRoutes);
+
 import leaseRoutes from './leases';
 app.use('/api/v1/leases', requireAuth, leaseRoutes);
+
+import paymentRoutes from './payments';
+app.use('/api/v1/payments', paymentRoutes);
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

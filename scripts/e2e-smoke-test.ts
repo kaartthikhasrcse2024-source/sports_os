@@ -40,10 +40,10 @@ async function runE2E() {
 
         console.log('5. Referee Engine Initialized...');
         // Pinging referee endpoint validation
-        const refRes = await fetch(`${BASE_URL}/referees/matches/bad-uuid/scorecard`, { method: 'POST', body: '{}', headers: { 'Content-Type': 'application/json' } });
+        const refRes = await fetch(`${BASE_URL}/referees/matches/bad-uuid/live-match-scorecard`, { method: 'POST', body: '{}', headers: { 'Content-Type': 'application/json' } });
         if (refRes.status === 404) throw new Error('Referee route missing');
 
-        console.log('6. Athletic Identity Scout System...');
+        console.log('6. Player Talent Pool System...');
         const scoutRes = await fetch(`${BASE_URL}/scout/players?height_cm_min=100`);
         if (scoutRes.status === 404) throw new Error('Scout API route missing');
 
