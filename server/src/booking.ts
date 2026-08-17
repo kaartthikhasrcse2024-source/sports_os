@@ -1,12 +1,14 @@
 import { Router } from 'express';
 import pool from './db';
-import { requireAuth } from './auth';
+import { requireAuth, requireRole } from './auth';
 
 const router = Router();
 
 // POST /api/v1/bookings/reserve
-router.post('/reserve', requireAuth, async (req, res) => {
-    const { slot_id, user_id, amount } = req.body;
+router.post('/reserve', requireAuth, requireRole(['PLAYER']), async (req, res) => {
+    const { slot_id, amount } = req.body;
+    const user_id = (req as any).user.sub || (req as any).user.id;
+
     if (!slot_id || !user_id || amount === undefined) {
         res.status(400).json({ error: 'Missing required fields' });
         return;
@@ -112,8 +114,10 @@ import { groupBookingQueue } from './queue';
 import { razorpay } from './payment';
 
 // POST /api/v1/bookings/group-reserve
-router.post('/group-reserve', requireAuth, async (req, res) => {
-    const { slot_id, user_id, amount, contributor_ids } = req.body;
+router.post('/group-reserve', requireAuth, requireRole(['PLAYER']), async (req, res) => {
+    const { slot_id, amount, contributor_ids } = req.body;
+    const user_id = (req as any).user.sub || (req as any).user.id;
+
     if (!slot_id || !user_id || amount === undefined || !contributor_ids || !contributor_ids.length) {
         res.status(400).json({ error: 'Missing required fields' });
         return;

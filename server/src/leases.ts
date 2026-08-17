@@ -1,11 +1,13 @@
 import { Router } from 'express';
 import pool from './db';
+import { requireAuth } from './auth';
+import { createNotification } from './services/notifications';
 
 const router = Router();
 
 // PUT Profile My Home Base
 router.put('/players/:id/home-turf', async (req, res) => {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { facility_id } = req.body;
     try {
         const result = await pool.query(
@@ -54,8 +56,9 @@ router.get('/incoming', async (req, res) => {
 });
 
 // POST Venue Rental Requests
-router.post('/requests', async (req, res) => {
-    const { facility_id, organizer_id, requested_slots } = req.body;
+router.post('/requests', requireAuth, async (req, res) => {
+    const { facility_id, requested_slots } = req.body;
+    const organizer_id = (req as any).user.sub || (req as any).user.id;
 
     // Quick validation array
     if (!facility_id || !organizer_id || !requested_slots) {
@@ -69,6 +72,21 @@ router.post('/requests', async (req, res) => {
              VALUES ($1, $2, $3) RETURNING *`,
             [facility_id, organizer_id, JSON.stringify(requested_slots)]
         );
+
+        // Fetch Facility Owner to notify them natively
+        const ownerQ = await pool.query(`SELECT owner_id, name FROM facilities WHERE id = $1`, [facility_id]);
+        if (ownerQ.rows.length > 0) {
+            await createNotification(pool, {
+                recipientId: ownerQ.rows[0].owner_id,
+                actorId: organizer_id,
+                type: 'LEASE_REQUESTED',
+                title: 'New Venue Lease Request',
+                message: `A Tournament Organizer requested a lease for ${ownerQ.rows[0].name}.`,
+                entityType: 'VENUE_LEASE_REQUEST',
+                entityId: result.rows[0].id
+            });
+        }
+
         res.json({ success: true, lease: result.rows[0] });
     } catch (e: any) {
         res.status(500).json({ error: e.message });
@@ -76,29 +94,102 @@ router.post('/requests', async (req, res) => {
 });
 
 // PUT Approve/Reject Lease
-router.put('/requests/:id/:action', async (req, res) => {
-    const { id, action } = req.params; // action = 'approve' | 'reject'
-    const status = action.toUpperCase() + 'ED';
+router.put('/requests/:id/:action', requireAuth, async (req, res) => {
+    const id = req.params.id as string;
+    const action = req.params.action as string;
+    const status = (action as string).toUpperCase() + 'ED';
+    const auth_user = (req as any).user.sub || (req as any).user.id;
+
+    if (['APPROVED', 'REJECTED'].indexOf(status) === -1) {
+        return res.status(400).json({ error: 'Invalid action.' });
+    }
 
     try {
-        // Execute booking over the live court calendar
         await pool.query('BEGIN');
 
+        // 1. Lock the lease request row & get facility info
+        const leaseQuery = await pool.query(
+            `SELECT vlr.*, f.owner_id 
+             FROM venue_lease_requests vlr
+             JOIN facilities f ON vlr.facility_id = f.id
+             WHERE vlr.id = $1 FOR UPDATE`,
+            [id]
+        );
+
+        if (leaseQuery.rows.length === 0) {
+            await pool.query('ROLLBACK');
+            return res.status(404).json({ error: 'Lease request not found.' });
+        }
+
+        const lease = leaseQuery.rows[0];
+
+        // Verify ownership and state
+        if (lease.owner_id !== auth_user) {
+            await pool.query('ROLLBACK');
+            return res.status(403).json({ error: 'Unauthorized to modify this facility.' });
+        }
+
+        if (lease.status !== 'PENDING') {
+            await pool.query('ROLLBACK');
+            return res.status(400).json({ error: 'Request is no longer pending.' });
+        }
+
+        // 2. Perform actual slot reservation constraints
+        if (status === 'APPROVED') {
+            // Find what date was requested
+            const requestedSlots = (lease.requested_slots as any) || {};
+            const requestedDate = requestedSlots.date;
+
+            if (requestedDate) {
+                // Lock slots for that facility on that exact date
+                const slotsToLock = await pool.query(
+                    `SELECT s.id, s.status 
+                     FROM slots s
+                     JOIN courts c ON s.court_id = c.id
+                     WHERE c.facility_id = $1
+                       AND s.start_time >= $2::timestamp 
+                       AND s.start_time < ($2::timestamp + interval '1 day')
+                     FOR UPDATE`,
+                    [lease.facility_id, requestedDate]
+                );
+
+                // Verify every slot in the list is still available
+                const unavailableSlots = slotsToLock.rows.filter(s => s.status !== 'available');
+                if (unavailableSlots.length > 0) {
+                    await pool.query('ROLLBACK');
+                    return res.status(409).json({ error: 'Cannot approve lease because some slots are no longer available (actively booked).' });
+                }
+
+                // Update requested slots back to booked/reserved vocabulary (status: 'booked')
+                if (slotsToLock.rows.length > 0) {
+                    const slotIds = slotsToLock.rows.map(s => s.id);
+                    await pool.query(
+                        `UPDATE slots SET status = 'booked', updated_at = now() WHERE id = ANY($1)`,
+                        [slotIds]
+                    );
+                }
+            }
+        }
+
+        // Finally, update lease request
         const leaseResp = await pool.query(
             `UPDATE venue_lease_requests SET status = $1 WHERE id = $2 RETURNING *`,
             [status, id]
         );
 
-        const lease = leaseResp.rows[0];
-
-        // Emulate slot locking on approval implicitly mapping over native boundaries
-        if (status === 'APPROVED' && lease) {
-            // Note: Since requested_slots is JSONB, extracting it perfectly requires loop parsing.
-            // For Part 4, simulation logic implies court allocations map to tournament hooks internally.
-        }
-
         await pool.query('COMMIT');
-        res.json({ success: true, lease });
+
+        await createNotification(pool, {
+            recipientId: lease.organizer_id,
+            actorId: auth_user,
+            type: status === 'APPROVED' ? 'LEASE_APPROVED' : 'LEASE_REJECTED',
+            title: `Lease Request ${status}`,
+            message: `Your requested venue rental has been ${status.toLowerCase()}.`,
+            entityType: 'VENUE_LEASE_REQUEST',
+            entityId: id
+        });
+
+        res.json({ success: true, lease: leaseResp.rows[0] });
     } catch (e: any) {
         await pool.query('ROLLBACK');
         res.status(500).json({ error: e.message });

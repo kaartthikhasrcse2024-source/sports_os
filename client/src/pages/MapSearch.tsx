@@ -7,6 +7,7 @@ import L from 'leaflet';
 // Fix leaflet default icon issue
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+import { API_URL } from '../config';
 let DefaultIcon = L.icon({
     iconUrl: icon,
     shadowUrl: iconShadow,
@@ -48,7 +49,7 @@ export default function MapSearch() {
     const fetchNearby = async () => {
         if (!location) return;
         setLoading(true);
-        let url = `http://localhost:3001/api/v1/facilities/nearby?lat=${location.lat}&lng=${location.lng}&radius_km=${radius}`;
+        let url = `${API_URL}/api/v1/facilities/nearby?lat=${location.lat}&lng=${location.lng}&radius_km=${radius}`;
 
         // Tag filtering mapping to the JSONB array structure
         if (tagFilter) {

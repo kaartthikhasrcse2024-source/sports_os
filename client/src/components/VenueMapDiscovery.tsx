@@ -4,25 +4,26 @@ import MarkerClusterGroup from 'react-leaflet-cluster';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import axios from 'axios';
-import { LocateFixed, Search, Map, DollarSign, Activity, Star } from 'lucide-react';
+import { LocateFixed, Search, Activity, Star, ChevronRight, MapPin } from 'lucide-react';
+import { API_URL } from '../config';
 
-// Custom Marker SVGs to differentiate Turfs and Tournaments without default pins
+// Premium Custom Marker SVGs to differentiate Turfs and Tournaments
 const createCustomIcon = (color: string, isPulse: boolean = false) => new L.DivIcon({
-    className: 'custom-icon',
+    className: 'custom-icon border-0 bg-transparent',
     html: `
-        <div style="position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-            ${isPulse ? `<div style="position: absolute; width: 100%; height: 100%; border-radius: 50%; background: ${color}; opacity: 0.4; animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>` : ''}
-            <div style="width: 20px; height: 20px; background: ${color}; border: 3px solid #1a1a1a; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>
-            <div style="position: absolute; bottom: 0; width: 4px; height: 10px; background: #1a1a1a;"></div>
+        <div style="position: relative; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+            ${isPulse ? `<div style="position: absolute; width: 100%; height: 100%; border-radius: 50%; background: ${color}; opacity: 0.3; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>` : ''}
+            <div style="width: 24px; height: 24px; background: ${color}; border: 4px solid #ffffff; border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.3); position: relative; z-index: 2;"></div>
+            ${!isPulse ? `<div style="position: absolute; bottom: 4px; width: 3px; height: 12px; background: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 1;"></div>` : ''}
         </div>
     `,
-    iconSize: [40, 40],
-    iconAnchor: [20, 40],
-    popupAnchor: [0, -40]
+    iconSize: [48, 48],
+    iconAnchor: [24, 48],
+    popupAnchor: [0, -48]
 });
 
-const turfIcon = createCustomIcon('#22c55e'); // Green
-const tournamentIcon = createCustomIcon('#eab308'); // Gold
+const turfIcon = createCustomIcon('#10b981'); // Emerald 500
+const tournamentIcon = createCustomIcon('#6366f1'); // Indigo 500
 const userIcon = createCustomIcon('#3b82f6', true); // Blue Pulsing
 
 // Sub-component intercepting map viewport transitions safely throttling API calls
@@ -58,9 +59,21 @@ function MapBoundsInterceptor({ onBoundsChange }: { onBoundsChange: (bounds: L.L
 function LocationMarker({ userPos }: { userPos: [number, number] | null }) {
     const map = useMap();
     useEffect(() => {
-        if (userPos) map.flyTo(userPos, 13);
+        if (userPos) map.flyTo(userPos, 14, { duration: 1.5 });
     }, [userPos, map]);
     return userPos ? <Marker position={userPos} icon={userIcon} /> : null;
+}
+
+// Ensure map container renders properly upon layout toggle
+function MapResizer() {
+    const map = useMap();
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            map.invalidateSize();
+        }, 300);
+        return () => clearTimeout(timeout);
+    }, [map]);
+    return null;
 }
 
 
@@ -76,9 +89,6 @@ export default function VenueMapDiscovery() {
     // Sidebar Filter Constraints
     const [searchQuery, setSearchQuery] = useState('');
     const [sport, setSport] = useState('');
-    const [radius, setRadius] = useState<number | ''>('');
-    const [minPrice, setMinPrice] = useState<number | ''>('');
-    const [maxPrice, setMaxPrice] = useState<number | ''>('');
 
     // Fetch marker payload dynamically inside bounds
     const fetchVenues = useCallback(async () => {
@@ -100,19 +110,16 @@ export default function VenueMapDiscovery() {
                 params.center_lat = center.lat;
                 params.center_lng = center.lng;
             }
-            if (radius) params.radius_km = radius;
             if (sport) params.sport = sport;
-            if (minPrice) params.min_price = minPrice;
-            if (maxPrice) params.max_price = maxPrice;
 
-            const { data } = await axios.get('http://localhost:3001/api/v1/venues/search', { params });
+            const { data } = await axios.get(`${API_URL}/api/v1/venues/search`, { params });
             setMarkers(data.markers || []);
         } catch (error) {
             console.error('API Geometry fault:', error);
         } finally {
             setLoading(false);
         }
-    }, [bounds, center, radius, sport, minPrice, maxPrice]);
+    }, [bounds, center, sport]);
 
     // Force fetch on arbitrary filter changes natively syncing with current bounds
     useEffect(() => {
@@ -149,123 +156,69 @@ export default function VenueMapDiscovery() {
     };
 
     return (
-        <div className="flex flex-col md:flex-row h-[85vh] bg-gray-50 border border-gray-300 rounded-2xl overflow-hidden relative shadow-2xl mt-4">
+        <div className="w-full h-[550px] relative flex flex-col group">
 
-            {/* Control Dashboard Overlay */}
-            <div className="w-full md:w-96 bg-white p-6 flex flex-col gap-6 overflow-y-auto border-r border-gray-300 z-[1000]">
-                <div>
-                    <h2 className="text-xl font-black text-gray-900 uppercase tracking-tighter flex items-center gap-2 mb-2">
-                        <Map size={24} className="text-emerald-700" />
-                        Discovery Matrix
-                    </h2>
-                    <p className="text-xs text-gray-600 font-bold tracking-widest uppercase">Target your local battlefield</p>
-                </div>
+            {/* Floating Filter Bar Overlay UI */}
+            <div className="absolute top-4 left-4 right-4 z-[400] flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between pointer-events-none">
 
-                <form onSubmit={searchNominatim} className="relative flex">
+                <form onSubmit={searchNominatim} className="relative flex w-full sm:max-w-md shadow-2xl pointer-events-auto overflow-hidden rounded-2xl">
                     <input
                         type="text"
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
-                        placeholder="Search City or Zone..."
-                        className="w-full bg-gray-50 border border-gray-300 rounded-l-xl p-4 text-gray-900 text-sm focus:border-emerald-600 outline-none"
+                        placeholder="Search Map..."
+                        className="w-full bg-white/95 backdrop-blur-md border-0 p-4 pl-5 font-bold text-slate-900 text-sm focus:ring-0 outline-none transition-colors"
                     />
-                    <button type="submit" className="bg-emerald-600 px-4 rounded-r-xl text-black hover:bg-emerald-600">
-                        <Search size={18} />
-                    </button>
-                    <button
-                        type="button"
-                        onClick={captureUserGeolocation}
-                        className="absolute right-[4rem] top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-900 transition-colors"
-                        title="Locate Me"
-                    >
+                    <button type="button" onClick={captureUserGeolocation} className="bg-white/95 px-4 text-emerald-600 hover:text-emerald-700 transition-colors border-l border-slate-100" title="Locate Me">
                         <LocateFixed size={18} />
+                    </button>
+                    <button type="submit" className="bg-emerald-600 px-5 text-slate-900 hover:bg-emerald-700 transition-colors flex items-center justify-center">
+                        <Search size={18} />
                     </button>
                 </form>
 
-                <div className="space-y-4">
-                    <h3 className="text-xs text-gray-500 font-black tracking-widest uppercase border-b border-gray-300 pb-2">Operational Filters</h3>
-
-                    <div>
-                        <label className="text-xs font-bold text-gray-600 mb-1 block">Sport Type</label>
+                <div className="flex gap-2 items-center pointer-events-auto">
+                    <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl flex items-center px-4 py-2 border border-slate-100">
                         <select
                             value={sport}
                             onChange={(e) => setSport(e.target.value)}
-                            className="w-full bg-gray-50 border border-gray-300 rounded-xl p-3 text-gray-900 text-sm focus:border-emerald-600 outline-none"
+                            className="bg-transparent border-0 text-slate-900 text-sm font-bold focus:ring-0 outline-none cursor-pointer appearance-none pr-6"
+                            style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right', backgroundRepeat: 'no-repeat' }}
                         >
-                            <option value="">Any Sport</option>
+                            <option value="">All Sports</option>
                             <option value="futsal">Futsal</option>
+                            <option value="football">Football</option>
                             <option value="basketball">Basketball</option>
                             <option value="tennis">Tennis</option>
-                            <option value="badminton">Badminton</option>
+                            <option value="cricket">Cricket</option>
                         </select>
                     </div>
 
-                    <div>
-                        <label className="text-xs font-bold text-gray-600 mb-1 flex justify-between">
-                            <span>Radius Constraint</span>
-                            <span className="text-emerald-700">{radius ? `${radius} km` : 'Worldwide'}</span>
-                        </label>
-                        <input
-                            type="range" min="1" max="100"
-                            value={radius === '' ? 50 : radius} onChange={(e) => setRadius(Number(e.target.value))}
-                            className="w-full accent-primary-500"
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="text-xs font-bold text-gray-600 mb-1 block">Min Rate</label>
-                            <div className="relative">
-                                <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                                <input
-                                    type="number" value={minPrice} onChange={e => setMinPrice(Number(e.target.value))}
-                                    className="w-full bg-gray-50 border border-gray-300 rounded-xl p-2 pl-8 text-gray-900 text-sm"
-                                />
-                            </div>
+                    {loading && (
+                        <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl p-3 border border-slate-100">
+                            <Activity size={18} className="text-emerald-600 animate-spin" />
                         </div>
-                        <div>
-                            <label className="text-xs font-bold text-gray-600 mb-1 block">Max Rate</label>
-                            <div className="relative">
-                                <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                                <input
-                                    type="number" value={maxPrice} onChange={e => setMaxPrice(Number(e.target.value))}
-                                    className="w-full bg-gray-50 border border-gray-300 rounded-xl p-2 pl-8 text-gray-900 text-sm"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="mt-auto">
-                    <div className="flex flex-col gap-2 p-4 bg-gray-50 rounded-xl border border-gray-300 border-dashed">
-                        <div className="flex items-center gap-3">
-                            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                            <span className="text-xs text-gray-600 font-bold uppercase tracking-wide">Available Turfs</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                            <span className="text-xs text-gray-600 font-bold uppercase tracking-wide">Active Tournaments</span>
-                        </div>
-                    </div>
-                    {loading && <div className="text-[10px] text-emerald-700 font-black tracking-widest text-center mt-4 animate-pulse">Syncing Geography...</div>}
+                    )}
                 </div>
             </div>
 
             {/* Geographical Canvas Sandbox */}
-            <div className="flex-1 relative z-0">
-                <MapContainer center={[40.7128, -74.0060]} zoom={12} className="w-full h-full" zoomControl={false}>
+            <div className="flex-1 w-full relative z-0 rounded-[2.5rem] overflow-hidden shadow-sm border border-slate-200">
+                <MapContainer center={[13.0827, 80.2707]} zoom={12} className="w-full h-full bg-slate-100" zoomControl={false}>
+                    {/* Modern Light TileLayer */}
                     <TileLayer
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        className="map-tiles-dark" // We will add a dark mode CSS filter
+                        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                        className="map-tiles"
                     />
 
                     <LocationMarker userPos={userLoc} />
                     <MapBoundsInterceptor onBoundsChange={(b, c) => { setBounds(b); setCenter(c); }} />
+                    <MapResizer />
 
                     <MarkerClusterGroup
                         chunkedLoading
-                        polygonOptions={{ fillColor: '#22c55e', color: '#22c55e', weight: 1 }}
+                        polygonOptions={{ fillColor: '#10b981', color: '#10b981', weight: 1, opacity: 0.5 }}
                     >
                         {markers.map((node) => (
                             <Marker
@@ -273,35 +226,51 @@ export default function VenueMapDiscovery() {
                                 position={[node.lat, node.lng]}
                                 icon={node.type === 'TURF' ? turfIcon : tournamentIcon}
                             >
-                                <Popup className="sportsos-popup">
-                                    <div className="p-1">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded ${node.type === 'TURF' ? 'bg-green-900/50 text-green-400' : 'bg-yellow-900/50 text-yellow-400'}`}>
-                                                {node.type}
-                                            </span>
-                                            {node.type === 'TURF' && <div className="flex items-center text-xs text-yellow-500 font-bold"><Star size={12} className="mr-1" /> 4.8</div>}
-                                        </div>
-                                        <h3 className="text-lg font-black text-gray-900 leading-tight mb-1">{node.name}</h3>
-                                        <p className="text-xs text-gray-600 mb-3 line-clamp-2">{node.address}</p>
+                                <Popup className="premium-popup">
+                                    <div className="p-0 m-0 w-[240px]">
+                                        <div className="h-28 relative overflow-hidden bg-white rounded-t-2xl">
+                                            <img
+                                                src="https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?q=80&w=600&auto=format&fit=crop"
+                                                className="w-full h-full object-cover opacity-60 mix-blend-multiply opacity-15 grayscale"
+                                                alt="Turf"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent" />
 
-                                        <div className="bg-gray-100 rounded-lg p-2 mb-3">
-                                            {node.type === 'TURF' ? (
-                                                <div className="flex items-center gap-2 text-xs font-bold text-gray-700">
-                                                    <DollarSign size={14} className="text-green-600" />
-                                                    Rate: <span>${((node.min_rate || 0) / 100).toFixed(2)} - ${((node.max_rate || 0) / 100).toFixed(2)}/hr</span>
-                                                </div>
-                                            ) : (
-                                                <div className="flex items-center gap-2 text-xs font-bold text-gray-700">
-                                                    <Activity size={14} className="text-yellow-600" />
-                                                    Entry: <span>${((node.min_rate || 0) / 100).toFixed(2)} /team</span>
-                                                </div>
-                                            )}
+                                            <div className="absolute top-3 left-3">
+                                                <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-full shadow-sm flex items-center gap-1 ${node.type === 'TURF' ? 'bg-emerald-500 text-white' : 'bg-indigo-500 text-slate-900'}`}>
+                                                    {node.type}
+                                                </span>
+                                            </div>
+
+                                            <div className="absolute bottom-3 left-3 right-3">
+                                                <h3 className="text-lg font-black text-slate-900 leading-tight line-clamp-1">{node.name}</h3>
+                                            </div>
                                         </div>
 
-                                        <a href={node.type === 'TURF' ? `/facility/${node.id}` : `/tournament/${node.id}`}
-                                            className="block text-center w-full bg-gray-900 hover:bg-gray-800 text-gray-900 font-bold py-2 rounded-lg text-xs uppercase tracking-widest transition-colors">
-                                            {node.type === 'TURF' ? 'Book Slot' : 'View Tournament'}
-                                        </a>
+                                        <div className="p-4 bg-white rounded-b-2xl">
+                                            <p className="text-xs text-slate-500 mb-4 line-clamp-2 font-medium flex items-start gap-1">
+                                                <MapPin size={12} className="shrink-0 mt-0.5 text-slate-500" />
+                                                {node.address || 'Address temporarily unavailable'}
+                                            </p>
+
+                                            <div className="flex items-center justify-between mb-4 px-3 py-2 bg-slate-50 rounded-xl border border-slate-100">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Rating</span>
+                                                    <span className="text-xs font-bold text-slate-900 flex items-center gap-1"><Star size={10} className="text-amber-500 fill-amber-500" /> 4.9</span>
+                                                </div>
+                                                <div className="w-[1px] h-6 bg-slate-200"></div>
+                                                <div className="flex flex-col text-right">
+                                                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Starting At</span>
+                                                    <span className="text-xs font-bold text-emerald-600">₹{((node.min_rate || 50000) / 100).toFixed(0)}<span className="text-slate-500 font-medium">/hr</span></span>
+                                                </div>
+                                            </div>
+
+                                            <a href={node.type === 'TURF' ? `/book/${node.id}` : `/tournament/${node.id}`}
+                                                className="flex items-center justify-center gap-2 w-full bg-white hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-widest transition-all group">
+                                                {node.type === 'TURF' ? 'Book Slot' : 'View Hub'}
+                                                <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                                            </a>
+                                        </div>
                                     </div>
                                 </Popup>
                             </Marker>
@@ -310,22 +279,29 @@ export default function VenueMapDiscovery() {
                 </MapContainer>
             </div>
 
-            {/* Inject Dark Mode CSS Filter Overrides */}
+            {/* Custom Premium CSS Overrides for Leaflet */}
             <style>{`
-                .map-tiles-dark {
-                    filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
-                }
-                .leaflet-popup-content-wrapper {
-                    background: #ffffff;
-                    color: #1a1a1a;
+                .premium-popup .leaflet-popup-content-wrapper {
+                    padding: 0;
+                    margin: 0;
+                    background: transparent;
+                    box-shadow: 0 20px 40px -10px rgba(0,0,0,0.3);
                     border-radius: 1rem;
-                    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+                    overflow: hidden;
                 }
-                .leaflet-popup-tip {
-                    background: #ffffff;
+                .premium-popup .leaflet-popup-content {
+                    margin: 0;
+                    width: auto !important;
                 }
-                .leaflet-container {
-                    background: #121212;
+                .premium-popup .leaflet-popup-tip-container {
+                    display: none;
+                }
+                .premium-popup .leaflet-popup-close-button {
+                    color: white !important;
+                    top: 10px !important;
+                    right: 10px !important;
+                    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+                    z-index: 10;
                 }
             `}</style>
         </div>

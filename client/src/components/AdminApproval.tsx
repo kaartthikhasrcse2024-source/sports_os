@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { supabase } from '../supabase';
 import { ShieldCheck, XCircle } from 'lucide-react';
+import { API_URL } from '../config';
 
 export default function AdminApproval() {
     const [pendingDocs, setPendingDocs] = useState<any[]>([]);
@@ -13,7 +14,7 @@ export default function AdminApproval() {
             const token = session.data.session?.access_token;
             if (!token) return;
 
-            const res = await axios.get('http://localhost:3001/api/v1/verification/admin/pending', {
+            const res = await axios.get(`${API_URL}/api/v1/verification/admin/pending`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             setPendingDocs(res.data);
@@ -33,7 +34,7 @@ export default function AdminApproval() {
             const session = await supabase.auth.getSession();
             const token = session.data.session?.access_token;
 
-            await axios.post(`http://localhost:3001/api/v1/verification/admin/review/${profileId}`, {
+            await axios.post(`${API_URL}/api/v1/verification/admin/review/${profileId}`, {
                 documentId,
                 decision,
                 notes: 'Administratively processed.'

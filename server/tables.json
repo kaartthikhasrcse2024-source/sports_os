@@ -1,0 +1,150 @@
+[
+  {
+    "table_name": "organizer_registrations",
+    "column_name": "updated_at"
+  },
+  {
+    "table_name": "organizer_registrations",
+    "column_name": "created_at"
+  },
+  {
+    "table_name": "organizer_registrations",
+    "column_name": "registration_status"
+  },
+  {
+    "table_name": "organizer_registrations",
+    "column_name": "operating_location"
+  },
+  {
+    "table_name": "organizer_registrations",
+    "column_name": "tournament_experience"
+  },
+  {
+    "table_name": "organizer_registrations",
+    "column_name": "sports_handled"
+  },
+  {
+    "table_name": "organizer_registrations",
+    "column_name": "registration_number"
+  },
+  {
+    "table_name": "organizer_registrations",
+    "column_name": "organization_type"
+  },
+  {
+    "table_name": "organizer_registrations",
+    "column_name": "organization_name"
+  },
+  {
+    "table_name": "organizer_registrations",
+    "column_name": "phone_number"
+  },
+  {
+    "table_name": "organizer_registrations",
+    "column_name": "organizer_name"
+  },
+  {
+    "table_name": "organizer_registrations",
+    "column_name": "user_id"
+  },
+  {
+    "table_name": "player_registrations",
+    "column_name": "user_id"
+  },
+  {
+    "table_name": "player_registrations",
+    "column_name": "age"
+  },
+  {
+    "table_name": "player_registrations",
+    "column_name": "gender"
+  },
+  {
+    "table_name": "player_registrations",
+    "column_name": "mobile_number"
+  },
+  {
+    "table_name": "player_registrations",
+    "column_name": "city"
+  },
+  {
+    "table_name": "player_registrations",
+    "column_name": "area"
+  },
+  {
+    "table_name": "player_registrations",
+    "column_name": "preferred_sport"
+  },
+  {
+    "table_name": "player_registrations",
+    "column_name": "playing_position"
+  },
+  {
+    "table_name": "player_registrations",
+    "column_name": "skill_level"
+  },
+  {
+    "table_name": "player_registrations",
+    "column_name": "registration_status"
+  },
+  {
+    "table_name": "player_registrations",
+    "column_name": "created_at"
+  },
+  {
+    "table_name": "player_registrations",
+    "column_name": "updated_at"
+  },
+  {
+    "table_name": "turf_owner_registrations",
+    "column_name": "updated_at"
+  },
+  {
+    "table_name": "turf_owner_registrations",
+    "column_name": "created_at"
+  },
+  {
+    "table_name": "turf_owner_registrations",
+    "column_name": "registration_status"
+  },
+  {
+    "table_name": "turf_owner_registrations",
+    "column_name": "operating_hours"
+  },
+  {
+    "table_name": "turf_owner_registrations",
+    "column_name": "number_of_turfs"
+  },
+  {
+    "table_name": "turf_owner_registrations",
+    "column_name": "sports_offered"
+  },
+  {
+    "table_name": "turf_owner_registrations",
+    "column_name": "turf_location"
+  },
+  {
+    "table_name": "turf_owner_registrations",
+    "column_name": "registration_number"
+  },
+  {
+    "table_name": "turf_owner_registrations",
+    "column_name": "business_type"
+  },
+  {
+    "table_name": "turf_owner_registrations",
+    "column_name": "business_name"
+  },
+  {
+    "table_name": "turf_owner_registrations",
+    "column_name": "phone_number"
+  },
+  {
+    "table_name": "turf_owner_registrations",
+    "column_name": "owner_name"
+  },
+  {
+    "table_name": "turf_owner_registrations",
+    "column_name": "user_id"
+  }
+]

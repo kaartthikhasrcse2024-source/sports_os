@@ -48,13 +48,6 @@ export default function Landing() {
                     </div>
                 </Link>
             </div>
-
-            {/* Development Bypass */}
-            <div className="z-10 mt-12">
-                <Link to="/dashboard" onClick={() => localStorage.setItem('dev_mock_role', 'PLAYER')} className="text-gray-500 hover:text-gray-900 border border-gray-200 hover:border-gray-500 bg-white/50 px-6 py-3 rounded-full font-bold tracking-widest text-xs uppercase transition-all shadow-lg backdrop-blur-md flex items-center gap-2">
-                    Enter Without Login (Dev Mode) <ArrowRight size={14} />
-                </Link>
-            </div>
         </div>
     );
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { API_URL } from '../config';
 
 export default function RefereeScorecard() {
     const [matchId, setMatchId] = useState('');
@@ -7,7 +8,7 @@ export default function RefereeScorecard() {
 
     const submit = async () => {
         const payload = { referee_id: "00000000-0000-0000-0000-333333333333", stats };
-        await fetch(`http://localhost:3001/api/v1/referees/matches/${matchId}/scorecard`, {
+        await fetch(`${API_URL}/api/v1/referees/matches/${matchId}/scorecard`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });

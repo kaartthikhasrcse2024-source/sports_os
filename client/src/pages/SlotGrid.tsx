@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
+import { API_URL } from '../config';
 
 export default function SlotGrid() {
     const [slots, setSlots] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch('http://localhost:3001/api/v1/bookings/slots')
+        fetch(`${API_URL}/api/v1/bookings/slots`)
             .then(r => r.json())
             .then(setSlots)
             .finally(() => setLoading(false));

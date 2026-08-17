@@ -124,7 +124,7 @@ router.post('/turf-owner/submit', requireAuth, upload.single('document'), async 
     }
 });
 
-router.get('/admin/pending', requireAuth, requireRole(['admin']), async (req, res) => {
+router.get('/admin/pending', requireAuth, requireRole(['ADMIN']), async (req, res) => {
     try {
         const docData = await pool.query(`
             SELECT v.id, v.profile_id, v.actor_role, v.document_type, v.file_url, v.uploaded_at,
@@ -141,7 +141,7 @@ router.get('/admin/pending', requireAuth, requireRole(['admin']), async (req, re
     }
 });
 
-router.post('/admin/review/:profileId', requireAuth, requireRole(['admin']), async (req, res) => {
+router.post('/admin/review/:profileId', requireAuth, requireRole(['ADMIN']), async (req, res) => {
     const { profileId } = req.params;
     const { decision, notes, documentId } = req.body; // 'VERIFIED' or 'REJECTED'
 

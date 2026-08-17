@@ -1,51 +1,65 @@
-import { useState } from 'react';
-
-const mockVenues = [
-    {
-        id: 'CHN-OWN-01',
-        name: 'Downtown Arena & Turf',
-        location: '4th Main Road, Anna Nagar, Chennai - 600040',
-        owner: 'Vigneshwaran R. (CHN-OWN-01)',
-        sports: 'Football (5-a-side), Box Cricket',
-        rate: '₹1,200/hr.'
-    },
-    {
-        id: 'CHN-OWN-02',
-        name: 'Bayview Smash & Turf Hub',
-        location: 'East Coast Road (ECR), Neelankarai, Chennai - 600115',
-        owner: 'Karthik Subramaniam (CHN-OWN-02)',
-        sports: 'Badminton, Football (7-a-side)',
-        rate: '₹800/hr.'
-    }
-];
-
-const presetPlayers = [
-    { id: 'CHN-PLY-101', name: 'Ashwin Kumar', location: 'Velachery', home_turf_id: null },
-    { id: 'CHN-PLY-103', name: 'Mohamed Riyas', location: 'Triplicane', home_turf_id: 'CHN-OWN-01' },
-    { id: 'CHN-PLY-105', name: 'Pradeep Chandran', location: 'T. Nagar', home_turf_id: 'CHN-OWN-01' },
-    { id: 'CHN-PLY-102', name: 'Kavyashree S.', location: 'Nungambakkam', home_turf_id: 'CHN-OWN-02' }
-];
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import { API_URL } from '../../config';
+import { MapPin, ShieldCheck, CheckCircle2, Search, ArrowRight } from 'lucide-react';
+import { getSportImage } from '../../utils/sportsImages';
 
 export default function PlayerDiscovery() {
-    const [selectedLocation, setSelectedLocation] = useState('Velachery, Chennai');
-    const [players, setPlayers] = useState(presetPlayers);
-    const [activePlayerId, setActivePlayerId] = useState('CHN-PLY-101'); // Default to Ashwin
+    const { session } = useAuth();
+    const [facilities, setFacilities] = useState<any[]>([]);
+    const [homeTurfId, setHomeTurfId] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchFacilities = async () => {
+            try {
+                const res = await fetch(`${API_URL}/api/v1/facilities`);
+                const data = await res.json();
+                if (Array.isArray(data)) setFacilities(data);
+            } catch (e) {
+                console.error('Failed to fetch facilities', e);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        const fetchProfile = async () => {
+            if (!session) return;
+            try {
+                const res = await fetch(`${API_URL}/api/v1/registration/status`, {
+                    headers: { 'Authorization': `Bearer ${session.access_token}` }
+                });
+                const data = await res.json();
+                if (data.profile?.home_turf_id) {
+                    setHomeTurfId(data.profile.home_turf_id);
+                }
+            } catch (e) { }
+        };
+
+        fetchFacilities();
+        fetchProfile();
+    }, [session]);
 
     const handleRegisterTurf = async (venueId: string) => {
+        if (!session) {
+            alert('Please login first');
+            return;
+        }
+
         try {
-            const res = await fetch('/api/v1/player/register-home-turf', {
+            const res = await fetch(`${API_URL}/api/v1/player/register-home-turf`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ playerId: activePlayerId, venueId })
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`
+                },
+                body: JSON.stringify({ venueId }) // playerId is derived from JWT backend
             });
             const data = await res.json();
 
             if (data.success || res.ok) {
-                // Update local state mock to reflect registration
-                setPlayers(players.map(p =>
-                    p.id === activePlayerId ? { ...p, home_turf_id: venueId } : p
-                ));
-                alert('Successfully registered as Home Turf!');
+                setHomeTurfId(venueId);
             } else {
                 alert('Failed to register: ' + (data.error || 'Unknown error'));
             }
@@ -55,84 +69,130 @@ export default function PlayerDiscovery() {
         }
     };
 
-    const activePlayer = players.find(p => p.id === activePlayerId);
+    const filteredFacilities = facilities.filter(f =>
+        (f.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (f.address || '').toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     return (
-        <div className="min-h-screen bg-gray-50 text-gray-900 p-8 font-sans">
-            <h1 className="text-3xl font-black text-emerald-700 uppercase tracking-wider mb-8 border-b-2 border-emerald-600 pb-2">Turf Discovery</h1>
+        <div className="min-h-screen bg-slate-50 text-slate-900 pb-20 font-sans">
+            {/* HER0 SECTION */}
+            <div className="bg-white pt-[calc(env(safe-area-inset-top)+2rem)] px-6 pb-12 rounded-b-[2.5rem] shadow-xl relative overflow-hidden text-center md:text-left">
+                <div className="absolute inset-0 z-0">
+                    <img
+                        src={getSportImage('football', 0)}
+                        alt="Background"
+                        className="w-full h-full object-cover opacity-15 grayscale"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-900" />
+                </div>
 
-            <div className="mb-8 p-4 border border-gray-300 bg-white">
-                <label className="block text-sm font-bold text-emerald-700 mb-2 uppercase tracking-wide">Select Area</label>
-                <select
-                    className="w-full bg-gray-50 border border-gray-300 text-gray-900 p-3 rounded-none focus:outline-none focus:border-emerald-600"
-                    value={selectedLocation}
-                    onChange={(e) => setSelectedLocation(e.target.value)}
-                >
-                    <option value="Velachery, Chennai">Velachery, Chennai</option>
-                    <option value="Anna Nagar">Anna Nagar</option>
-                    <option value="Adyar">Adyar</option>
-                    <option value="Nungambakkam">Nungambakkam</option>
-                    <option value="ECR">ECR</option>
-                </select>
+                <div className="relative z-10 max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                        <h1 className="text-3xl md:text-5xl font-black text-slate-900 uppercase tracking-tighter mb-2 leading-tight">
+                            Scout Your <span className="text-emerald-500">Home Turf</span>
+                        </h1>
+                        <p className="text-slate-500 font-medium max-w-md">Discover premium arenas and set your primary location to match with local players automatically.</p>
+                    </div>
+                </div>
+
+                <div className="relative z-10 mt-8 max-w-xl mx-auto md:mx-0">
+                    <div className="relative">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5" />
+                        <input
+                            type="text"
+                            placeholder="Search by venue name or area..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full bg-slate-100/80 border border-slate-700 rounded-2xl py-4 pl-12 pr-4 text-slate-900 placeholder-slate-500 focus:ring-2 focus:ring-emerald-500 transition-all shadow-lg"
+                        />
+                    </div>
+                </div>
             </div>
 
-            <div className="mb-8 p-4 border border-gray-300 bg-white text-sm">
-                <h2 className="text-xl font-bold text-emerald-700 mb-4 uppercase">Acting as Player</h2>
-                <select
-                    className="w-full bg-gray-50 border border-gray-300 text-gray-900 p-2 mb-4 rounded-none"
-                    value={activePlayerId}
-                    onChange={(e) => setActivePlayerId(e.target.value)}
-                >
-                    {players.map(p => (
-                        <option key={p.id} value={p.id}>{p.name} ({p.id}) - {p.location}</option>
-                    ))}
-                </select>
-                <p><strong>Current Active:</strong> {activePlayer?.name}</p>
-                <p><strong>Home Turf Registered:</strong> <span className={activePlayer?.home_turf_id ? "text-emerald-700" : "text-gray-500"}>{activePlayer?.home_turf_id || 'None'}</span></p>
-            </div>
+            <div className="max-w-5xl mx-auto px-6 mt-10">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                        <MapPin className="text-emerald-600 w-5 h-5" /> Available Facilities
+                    </h2>
+                    <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">{filteredFacilities.length} Results</span>
+                </div>
 
-            <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-gray-900 uppercase tracking-widest mb-4">Available Venues</h2>
-                {mockVenues.map(venue => {
-                    const isRegistered = activePlayer?.home_turf_id === venue.id;
-                    return (
-                        <div key={venue.id} className="border-l-4 border-emerald-600 bg-white p-6 flex flex-col md:flex-row justify-between items-start md:items-center">
-                            <div className="mb-4 md:mb-0">
-                                <h3 className="text-xl font-bold text-emerald-700">{venue.name}</h3>
-                                <p className="text-gray-600 mt-1">{venue.location}</p>
-                                <div className="mt-3 text-sm flex gap-4 text-gray-700">
-                                    <span><strong>Owner:</strong> {venue.owner}</span>
-                                    <span><strong>Rate:</strong> {venue.rate}</span>
+                {loading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className="animate-pulse bg-white rounded-3xl h-72 w-full shadow-sm border border-slate-100"></div>
+                        ))}
+                    </div>
+                ) : filteredFacilities.length === 0 ? (
+                    <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center flex flex-col items-center">
+                        <MapPin size={48} className="text-slate-200 mb-4" />
+                        <h3 className="text-lg font-bold text-slate-800 mb-2">No turfs found in your perimeter.</h3>
+                        <p className="text-slate-500 text-sm max-w-sm">Try searching for a different area or adjusting your filters.</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filteredFacilities.map(venue => {
+                            const isRegistered = homeTurfId === venue.id;
+                            return (
+                                <div key={venue.id} className={`group bg-white rounded-3xl overflow-hidden shadow-sm border transition-all duration-300 ${isRegistered ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-slate-200 hover:shadow-xl hover:border-emerald-300'}`}>
+                                    <div className="h-48 bg-white relative overflow-hidden">
+                                        <img
+                                            src={getSportImage('turf', venue.id?.charCodeAt(0) || 0)}
+                                            alt={venue.name}
+                                            className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-700"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+                                        {/* Badges */}
+                                        <div className="absolute top-4 left-4 flex gap-2">
+                                            {isRegistered && (
+                                                <span className="bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-md flex items-center gap-1">
+                                                    <ShieldCheck size={12} /> HOME TURF
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <div className="absolute bottom-4 left-4 right-4">
+                                            <h3 className="text-xl font-black text-white tracking-tight leading-tight drop-shadow-lg">{venue.name}</h3>
+                                            <p className="text-emerald-300 text-xs font-bold uppercase tracking-widest mt-1 flex items-center gap-1">
+                                                <MapPin size={10} /> {venue.city || 'Local Zone'}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-5">
+                                        <p className="text-slate-500 text-sm line-clamp-2 mb-4 min-h-[40px] font-medium">
+                                            {venue.address || 'Address details not provided by owner.'}
+                                        </p>
+
+                                        <div className="flex items-center gap-3 text-xs mb-6 text-slate-700 font-bold bg-slate-50 p-2 rounded-lg">
+                                            <span>Outdoor: <span className={venue.is_outdoor ? 'text-emerald-600' : 'text-slate-500'}>{venue.is_outdoor ? 'Yes' : 'No'}</span></span>
+                                            <span className="text-slate-600">•</span>
+                                            <span>Premium Approved</span>
+                                        </div>
+
+                                        <button
+                                            onClick={() => handleRegisterTurf(venue.id)}
+                                            disabled={isRegistered}
+                                            className={`w-full py-4 rounded-xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 border-2 
+                                                ${isRegistered
+                                                    ? 'bg-emerald-50 text-emerald-700 cursor-default border-emerald-200'
+                                                    : 'bg-emerald-500 text-white border-emerald-500 hover:bg-emerald-400 hover:shadow-lg hover:shadow-emerald-500/20 active:scale-95'
+                                                }`}
+                                        >
+                                            {isRegistered ? (
+                                                <><CheckCircle2 size={16} /> Verified Home</>
+                                            ) : (
+                                                <>Claim As Home Base <ArrowRight size={16} /></>
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
-                                <p className="text-sm mt-1 text-gray-700"><strong>Sports:</strong> {venue.sports}</p>
-                            </div>
-                            <button
-                                onClick={() => handleRegisterTurf(venue.id)}
-                                disabled={isRegistered}
-                                className={`px-6 py-3 font-bold uppercase tracking-wider transition-colors border ${isRegistered ? 'bg-dark-700 border-gray-300 text-gray-500 cursor-not-allowed' : 'bg-emerald-600 text-dark-900 border-emerald-600 hover:bg-transparent hover:text-emerald-700'}`}
-                            >
-                                {isRegistered ? 'Registered' : 'Register as Home Turf'}
-                            </button>
-                        </div>
-                    );
-                })}
-            </div>
-
-            {/* Displaying Mock Records from objective */}
-            <div className="mt-12 p-6 border border-gray-300">
-                <h2 className="text-lg font-bold text-emerald-700 uppercase tracking-widest mb-4">Mock Records Overview</h2>
-                <ul className="space-y-2 text-sm text-gray-700">
-                    {players.map(p => (
-                        <li key={p.id}>
-                            <span className="inline-block w-48 font-bold">{p.name} ({p.id})</span>
-                            <span>{p.location}</span>
-                            {' -> '}
-                            <span className={p.home_turf_id ? "text-emerald-700 font-bold" : "text-gray-500"}>
-                                {p.home_turf_id ? `Home Turf: ${p.home_turf_id}` : 'No Home Turf'}
-                            </span>
-                        </li>
-                    ))}
-                </ul>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
         </div>
     );

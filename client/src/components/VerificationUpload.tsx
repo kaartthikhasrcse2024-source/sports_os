@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { supabase } from '../supabase';
+import { API_URL } from '../config';
 
 export default function VerificationUpload({ role }: { role: 'TURF_OWNER' | 'TOURNAMENT_ORGANIZER' }) {
     const [file, setFile] = useState<File | null>(null);
@@ -34,7 +35,7 @@ export default function VerificationUpload({ role }: { role: 'TURF_OWNER' | 'TOU
             if (role === 'TURF_OWNER') formData.append('business_tax_id', certId);
             else formData.append('organizer_cert_id', certId);
 
-            await axios.post('http://localhost:3001/api/v1/verification/turf-owner/submit', formData, {
+            await axios.post(`${API_URL}/api/v1/verification/turf-owner/submit`, formData, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data'

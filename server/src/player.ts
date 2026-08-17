@@ -1,11 +1,95 @@
 import { Router } from 'express';
 import pool from './db';
-import { requireRole } from './auth';
+import { requireRole, requireAuth } from './auth';
 
 const router = Router();
 
+router.post('/registration', requireAuth, async (req, res) => {
+    try {
+        const userId = (req as any).user.sub;
+        if (!userId) return res.status(401).json({ error: "UNAUTHORIZED" });
+
+        const { name, age, gender, mobile_number, city, area, preferred_sport, playing_position, skill_level } = req.body;
+
+        const errors: any = {};
+        if (!name || typeof name !== 'string' || name.trim() === '') errors.name = 'Required';
+        if (typeof age !== 'number' || !Number.isInteger(age) || age < 5 || age > 100) errors.age = 'Must be an integer between 5 and 100';
+        if (!gender || typeof gender !== 'string' || gender.trim() === '') errors.gender = 'Required';
+        if (!mobile_number || typeof mobile_number !== 'string' || mobile_number.trim() === '') errors.mobile_number = 'Required';
+        if (!city || typeof city !== 'string' || city.trim() === '') errors.city = 'Required';
+        if (!area || typeof area !== 'string' || area.trim() === '') errors.area = 'Required';
+        if (!preferred_sport || typeof preferred_sport !== 'string' || preferred_sport.trim() === '') errors.preferred_sport = 'Required';
+        if (!playing_position || typeof playing_position !== 'string' || playing_position.trim() === '') errors.playing_position = 'Required';
+        if (!skill_level || typeof skill_level !== 'string' || skill_level.trim() === '') errors.skill_level = 'Required';
+
+        if (Object.keys(errors).length > 0) {
+            return res.status(400).json({ error: 'VALIDATION_ERROR', fields: errors });
+        }
+
+        const profileRes = await pool.query(`SELECT id, role, user_role FROM profiles WHERE id = $1`, [userId]);
+        if (profileRes.rows.length === 0) {
+            return res.status(404).json({ error: 'PROFILE_NOT_FOUND' });
+        }
+
+        const profile = profileRes.rows[0];
+        const rawRole = profile.user_role || profile.role || '';
+        if (rawRole.toUpperCase() !== 'PLAYER') {
+            return res.status(403).json({ error: 'PLAYER_ROLE_REQUIRED' });
+        }
+
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+
+            const regRes = await client.query(`
+                INSERT INTO player_registrations (
+                    user_id, age, gender, mobile_number, city, area, 
+                    preferred_sport, playing_position, skill_level, registration_status, updated_at
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'SUBMITTED', NOW())
+                ON CONFLICT (user_id) DO UPDATE SET
+                    age = EXCLUDED.age,
+                    gender = EXCLUDED.gender,
+                    mobile_number = EXCLUDED.mobile_number,
+                    city = EXCLUDED.city,
+                    area = EXCLUDED.area,
+                    preferred_sport = EXCLUDED.preferred_sport,
+                    playing_position = EXCLUDED.playing_position,
+                    skill_level = EXCLUDED.skill_level,
+                    registration_status = 'SUBMITTED',
+                    updated_at = NOW()
+                RETURNING *
+            `, [userId, age, gender, mobile_number, city, area, preferred_sport, playing_position, skill_level]);
+
+            const updatedProfileRes = await client.query(`
+                UPDATE profiles 
+                SET full_name = $1, name = $1, sport_type = $2, position = $3
+                WHERE id = $4
+                RETURNING *
+            `, [name, preferred_sport, playing_position, userId]);
+
+            await client.query('COMMIT');
+
+            return res.status(200).json({
+                success: true,
+                registration: regRes.rows[0],
+                profile: updatedProfileRes.rows[0],
+                message: "Player registration submitted successfully."
+            });
+        } catch (dbErr) {
+            await client.query('ROLLBACK');
+            console.error("Transaction Error:", dbErr);
+            return res.status(500).json({ error: "INTERNAL_SERVER_ERROR" });
+        } finally {
+            client.release();
+        }
+    } catch (e) {
+        console.error("Endpoint Error:", e);
+        res.status(500).json({ error: "INTERNAL_SERVER_ERROR" });
+    }
+});
+
 // Restrict all routes to players only
-router.use(requireRole(['player']));
+router.use(requireRole(['PLAYER']));
 
 router.get('/bookings', async (req, res) => {
     try {
@@ -41,12 +125,10 @@ router.post('/register-turf', async (req, res) => {
 
 router.post('/register-home-turf', async (req, res) => {
     try {
-        const { playerId, venueId } = req.body;
-        if (!playerId || !venueId) return res.status(400).json({ error: 'playerId and venueId required' });
+        const playerId = (req as any).user.sub || (req as any).user.id;
+        const { venueId } = req.body;
+        if (!venueId) return res.status(400).json({ error: 'venueId required' });
 
-        // Update the database record if the profile exists (ignoring auth for mockup).
-        // Since we are mocking the other players, we might just return success if it's purely a mockup,
-        // but let's try updating it if it's connected to DB profiles, otherwise just return success.
         await pool.query(`UPDATE profiles SET home_turf_id = $1 WHERE id = $2`, [venueId, playerId]);
 
         res.json({ success: true, message: 'Home Turf registered successfully for ' + playerId });

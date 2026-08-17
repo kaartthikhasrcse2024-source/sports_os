@@ -2,6 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { supabase } from '../supabase';
 import { Smartphone } from 'lucide-react';
+import { API_URL } from '../config';
 
 export default function VerifyPhone() {
     const [phone, setPhone] = useState('');
@@ -43,7 +44,7 @@ export default function VerifyPhone() {
             const token = session.data.session?.access_token;
             if (!token) throw new Error("Unauthorized context block.");
 
-            await axios.post('http://localhost:3001/api/v1/verification/player/verify-otp', {
+            await axios.post(`${API_URL}/api/v1/verification/player/verify-otp`, {
                 phone,
                 code: otpCode
             }, {

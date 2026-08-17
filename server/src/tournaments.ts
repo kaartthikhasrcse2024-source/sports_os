@@ -1,41 +1,168 @@
 import { Router } from 'express';
 import pool from './db';
 import { requireVerifiedRole } from './auth';
+import { createNotification } from './services/notifications';
 
 const router = Router();
+
+// Get all tournaments dynamically so players/organizers can view them
+router.get('/', async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT t.*, f.name as facility_name 
+             FROM tournaments t 
+             LEFT JOIN facilities f ON t.facility_id = f.id
+             ORDER BY t.created_at DESC`
+        );
+        res.json(result.rows);
+    } catch (e: any) {
+        console.error('Create tournament error', e);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
 
 // Create Tournament (VERIFIED TOURNAMENT ORGANIZER ONLY)
 router.post('/', requireVerifiedRole(['TOURNAMENT_ORGANIZER']), async (req, res) => {
     const { facility_id, name, format, max_teams, start_date } = req.body;
+    const organizerId = (req as any).user.sub || (req as any).user.id;
     try {
         const result = await pool.query(
-            `INSERT INTO tournaments (facility_id, name, format, max_teams, start_date) 
-             VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-            [facility_id, name, format, max_teams, start_date]
+            `INSERT INTO tournaments (facility_id, name, format, max_teams, start_date, organizer_id) 
+             VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+            [facility_id, name, format, max_teams, start_date, organizerId]
         );
         res.json(result.rows[0]);
-    } catch (e: any) { res.status(500).json({ error: e.message }); }
+    } catch (e: any) {
+        console.error('Create tournament error', e);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 // Team Sign-Up & Entry
-router.post('/:id/teams', async (req, res) => {
+router.post('/:id/teams', requireVerifiedRole(['PLAYER', 'TOURNAMENT_ORGANIZER']), async (req, res) => {
     const { team_name } = req.body;
     const { id } = req.params;
+    const userId = (req as any).user.sub || (req as any).user.id;
+
     try {
+        await pool.query('BEGIN');
+
+        // Enforce lock bounding maximum teams seamlessly generating accurate capacity limits
+        const tQuery = await pool.query(`SELECT id, name, max_teams, status, organizer_id FROM tournaments WHERE id = $1 FOR UPDATE`, [id]);
+        if (tQuery.rows.length === 0) throw new Error('Tournament not found');
+
+        if (tQuery.rows[0].status !== 'OPEN') {
+            await pool.query('ROLLBACK');
+            return res.status(403).json({ error: 'Registration is closed' });
+        }
+
+        const maxTeams = tQuery.rows[0].max_teams;
+
+        // Check explicit registration counts avoiding concurrent bypass potentials
+        const countQuery = await pool.query(`SELECT count(id) FROM tournament_teams WHERE tournament_id = $1`, [id]);
+        if (parseInt(countQuery.rows[0].count) >= maxTeams) {
+            await pool.query('ROLLBACK');
+            return res.status(409).json({ error: 'Tournament registration is completely full.' });
+        }
+
         const result = await pool.query(
-            `INSERT INTO tournament_teams (tournament_id, team_name) VALUES ($1, $2) RETURNING *`,
-            [id, team_name]
+            `INSERT INTO tournament_teams (tournament_id, team_name, captain_id) VALUES ($1, $2, $3) RETURNING *`,
+            [id, team_name, userId]
         );
-        res.json(result.rows[0]);
-    } catch (e: any) { res.status(500).json({ error: e.message }); }
+
+        const team = result.rows[0];
+
+        // Add creator securely to the normalized mapping table natively
+        await pool.query(
+            `INSERT INTO tournament_team_players (team_id, player_id, status) VALUES ($1, $2, 'ACTIVE')`,
+            [team.id, userId]
+        );
+
+        await pool.query('COMMIT');
+
+        // Cross Actor Notification Pipeline resolving post-transaction hooks precisely avoiding mock limits
+        if (tQuery.rows[0].organizer_id) {
+            await createNotification(pool, {
+                recipientId: tQuery.rows[0].organizer_id,
+                actorId: userId,
+                type: 'TOURNAMENT_TEAM_REGISTERED',
+                title: 'New Team Registration',
+                message: `Team ${team_name} successfully registered for ${tQuery.rows[0].name}`,
+                entityType: 'TOURNAMENT',
+                entityId: id as string
+            });
+        }
+
+        res.json(team);
+    } catch (e: any) {
+        await pool.query('ROLLBACK');
+        console.error('Tournament team sign-up error', e);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Join Active Team seamlessly
+router.post('/teams/:team_id/join', requireVerifiedRole(['PLAYER']), async (req, res) => {
+    const team_id = req.params.team_id as string;
+    const playerId = (req as any).user.sub || (req as any).user.id;
+
+    try {
+        // Enforce team availability preventing unauthorized modifications natively
+        const teamCheck = await pool.query('SELECT id, tournament_id FROM tournament_teams WHERE id = $1', [team_id]);
+        if (teamCheck.rows.length === 0) return res.status(404).json({ error: 'Team not found' });
+
+        // Enforce deduplication natively checking status directly blocking double overlaps
+        const exists = await pool.query('SELECT 1 FROM tournament_team_players WHERE team_id = $1 AND player_id = $2', [team_id, playerId]);
+        if (exists.rows.length > 0) return res.json({ success: true, message: "Already a member." });
+
+        await pool.query(
+            `INSERT INTO tournament_team_players (team_id, player_id, status)
+             VALUES ($1, $2, 'ACTIVE')
+             ON CONFLICT (team_id, player_id) DO NOTHING`,
+            [team_id, playerId]
+        );
+        res.json({ success: true, message: "Successfully joined team securely." });
+    } catch (e: any) {
+        console.error('Create tournament error', e);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Leave Team / Remove Player securely
+router.delete('/teams/:team_id/players/:player_id', requireVerifiedRole(['PLAYER', 'TOURNAMENT_ORGANIZER']), async (req, res) => {
+    const team_id = req.params.team_id as string;
+    const player_id = req.params.player_id as string;
+    const authId = (req as any).user.sub || (req as any).user.id;
+
+    try {
+        // Allow self removal OR removal by explicitly mapped captain
+        if (authId !== player_id) {
+            const team = await pool.query('SELECT captain_id FROM tournament_teams WHERE id = $1', [team_id]);
+            if (team.rows.length === 0 || team.rows[0].captain_id !== authId) {
+                return res.status(403).json({ error: 'You are not authorized to remove this player.' });
+            }
+        }
+
+        await pool.query('DELETE FROM tournament_team_players WHERE team_id = $1 AND player_id = $2', [team_id, player_id]);
+        res.json({ success: true, message: 'Player securely removed.' });
+    } catch (e: any) {
+        console.error('Create tournament error', e);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 // Generate Brackets
-router.post('/:id/generate', async (req, res) => {
+router.post('/:id/generate', requireVerifiedRole(['TOURNAMENT_ORGANIZER']), async (req, res) => {
     const { id } = req.params;
+    const organizerId = (req as any).user.sub || (req as any).user.id;
     try {
-        const tQuery = await pool.query(`SELECT format FROM tournaments WHERE id = $1`, [id]);
+        const tQuery = await pool.query(`SELECT format, organizer_id FROM tournaments WHERE id = $1`, [id]);
         if (tQuery.rows.length === 0) return res.status(404).json({ error: 'Not found' });
+
+        // Strict Authorization Constraint bounding the explicitly matched identity over generation
+        if (tQuery.rows[0].organizer_id !== organizerId) {
+            return res.status(403).json({ error: 'You do not have permission to generate this tournament bracket.' });
+        }
 
         const format = tQuery.rows[0].format;
         const teamsQuery = await pool.query(`SELECT id FROM tournament_teams WHERE tournament_id = $1`, [id]);
@@ -61,7 +188,7 @@ router.post('/:id/generate', async (req, res) => {
                 const matchCount = Math.pow(2, numRounds - r); // Finals(1), Semis(2), Quarters(4)
                 for (let i = 0; i < matchCount; i++) {
                     const mRes = await pool.query(
-                        `INSERT INTO bracket_matches (tournament_id, round, match_index) VALUES ($1, $2, $3) RETURNING id`,
+                        `INSERT INTO bracket_matches(tournament_id, round, match_index) VALUES($1, $2, $3) RETURNING id`,
                         [id, r, i]
                     );
                     const matchId = mRes.rows[0].id;
@@ -115,7 +242,7 @@ router.post('/:id/generate', async (req, res) => {
             for (let i = 0; i < teams.length; i++) {
                 for (let j = i + 1; j < teams.length; j++) {
                     await pool.query(
-                        `INSERT INTO bracket_matches (tournament_id, round, match_index, team_a_id, team_b_id) VALUES ($1, $2, $3, $4, $5)`,
+                        `INSERT INTO bracket_matches(tournament_id, round, match_index, team_a_id, team_b_id) VALUES($1, $2, $3, $4, $5)`,
                         [id, 1, matchIdx++, teams[i].id, teams[j].id]
                     );
                 }
@@ -123,21 +250,46 @@ router.post('/:id/generate', async (req, res) => {
         }
 
         res.json({ success: true });
-    } catch (e: any) { res.status(500).json({ error: e.message }); }
+    } catch (e: any) {
+        console.error('Create tournament error', e);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 router.get('/:id/data', async (req, res) => {
     const { id } = req.params;
-    const teams = await pool.query(`SELECT * FROM tournament_teams WHERE tournament_id = $1`, [id]);
-    const matches = await pool.query(`SELECT * FROM bracket_matches WHERE tournament_id = $1 ORDER BY round ASC, match_index ASC`, [id]);
-    res.json({ teams: teams.rows, matches: matches.rows });
+    try {
+        const teams = await pool.query(`SELECT * FROM tournament_teams WHERE tournament_id = $1`, [id]);
+        const matches = await pool.query(`SELECT * FROM bracket_matches WHERE tournament_id = $1 ORDER BY round ASC, match_index ASC`, [id]);
+
+        // Fetch explicit authentic players mapped mathematically via junction table
+        const players = await pool.query(
+            `SELECT p.id, p.name, p.sport_type, p.position, tp.team_id 
+             FROM profiles p
+             JOIN tournament_team_players tp ON p.id = tp.player_id
+             JOIN tournament_teams tt ON tp.team_id = tt.id
+             WHERE tt.tournament_id = $1 AND tp.status = 'ACTIVE'`, [id]);
+
+        res.json({ teams: teams.rows, matches: matches.rows, roster: players.rows });
+    } catch (e: any) {
+        console.error('Create tournament error', e);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 // Admin resolving logic triggering cascaded boundaries forwards mapping strictly
-router.post('/:id/matches/:match_id/winner', async (req, res) => {
-    const { match_id } = req.params;
+router.post('/:id/matches/:match_id/winner', requireVerifiedRole(['TOURNAMENT_ORGANIZER']), async (req, res) => {
+    const { id, match_id } = req.params;
     const { winner_id } = req.body;
+    const organizerId = (req as any).user.sub || (req as any).user.id;
+
     try {
+        // Enforce ownership
+        const tCheck = await pool.query('SELECT organizer_id FROM tournaments WHERE id = $1', [id]);
+        if (tCheck.rows[0]?.organizer_id !== organizerId) {
+            return res.status(403).json({ error: 'Unauthorized to modify tournament matches.' });
+        }
+
         await pool.query(`UPDATE bracket_matches SET winner_id = $1 WHERE id = $2`, [winner_id, match_id]);
 
         // Propagate branch correctly bounding explicit children sequentially
@@ -149,17 +301,29 @@ router.post('/:id/matches/:match_id/winner', async (req, res) => {
             await pool.query(`UPDATE bracket_matches SET ${side} = $1 WHERE id = $2`, [winner_id, mappingId]);
         }
         res.json({ success: true });
-    } catch (e: any) { res.status(500).json({ error: e.message }); }
+    } catch (e: any) {
+        console.error('Create tournament error', e);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 // Organizer Court Locking
-router.post('/:id/matches/:match_id/slot', async (req, res) => {
-    const { match_id } = req.params;
+router.post('/:id/matches/:match_id/slot', requireVerifiedRole(['TOURNAMENT_ORGANIZER']), async (req, res) => {
+    const { id, match_id } = req.params;
     const { slot_id } = req.body;
+    const organizerId = (req as any).user.sub || (req as any).user.id;
     try {
+        // Enforce ownership natively validating organizer rights gracefully
+        const tCheck = await pool.query('SELECT organizer_id FROM tournaments WHERE id = $1', [id]);
+        if (tCheck.rows[0]?.organizer_id !== organizerId) {
+            return res.status(403).json({ error: 'Unauthorized to lock slots.' });
+        }
         await pool.query(`UPDATE bracket_matches SET court_slot_id = $1 WHERE id = $2`, [slot_id, match_id]);
         res.json({ success: true });
-    } catch (e: any) { res.status(500).json({ error: e.message }); }
+    } catch (e: any) {
+        console.error('Create tournament error', e);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 export default router;

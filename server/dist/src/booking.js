@@ -8,8 +8,9 @@ const db_1 = __importDefault(require("./db"));
 const auth_1 = require("./auth");
 const router = (0, express_1.Router)();
 // POST /api/v1/bookings/reserve
-router.post('/reserve', auth_1.requireAuth, async (req, res) => {
-    const { slot_id, user_id, amount } = req.body;
+router.post('/reserve', auth_1.requireAuth, (0, auth_1.requireRole)(['PLAYER']), async (req, res) => {
+    const { slot_id, amount } = req.body;
+    const user_id = req.user.sub || req.user.id;
     if (!slot_id || !user_id || amount === undefined) {
         res.status(400).json({ error: 'Missing required fields' });
         return;
@@ -93,8 +94,9 @@ router.post('/:id/payments/:paymentId/confirm', auth_1.requireAuth, async (req, 
 const queue_1 = require("./queue");
 const payment_1 = require("./payment");
 // POST /api/v1/bookings/group-reserve
-router.post('/group-reserve', auth_1.requireAuth, async (req, res) => {
-    const { slot_id, user_id, amount, contributor_ids } = req.body;
+router.post('/group-reserve', auth_1.requireAuth, (0, auth_1.requireRole)(['PLAYER']), async (req, res) => {
+    const { slot_id, amount, contributor_ids } = req.body;
+    const user_id = req.user.sub || req.user.id;
     if (!slot_id || !user_id || amount === undefined || !contributor_ids || !contributor_ids.length) {
         res.status(400).json({ error: 'Missing required fields' });
         return;
@@ -123,8 +125,8 @@ router.post('/group-reserve', auth_1.requireAuth, async (req, res) => {
         await Promise.all(insertPromises);
         await client.query("UPDATE slots SET status = 'held', updated_at = now() WHERE id = $1", [slot_id]);
         await client.query('COMMIT');
-        // Schedule cleanup after 30 seconds
-        await queue_1.groupBookingQueue.add('checkGroupPayment', { booking_id }, { delay: 30000 });
+        // Schedule cleanup after 15 minutes (split escrow timeout)
+        await queue_1.groupBookingQueue.add('checkGroupPayment', { booking_id }, { delay: 15 * 60 * 1000 });
         res.status(201).json({
             booking_id
         });

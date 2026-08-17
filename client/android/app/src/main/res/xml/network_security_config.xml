@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Sports OS — Android Network Security Configuration
+    ─────────────────────────────────────────────────
+    PRODUCTION: All traffic must use HTTPS. No cleartext allowed.
+    DEVELOPMENT: Localhost and Android emulator host (10.0.2.2) are
+    allowed cleartext HTTP so developers can test against a local
+    Express server without an SSL certificate.
+    DO NOT add production domains to the cleartext-permit list.
+-->
+<network-security-config>
+    <!-- Production: require HTTPS for all domains by default -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- Development-only: allow HTTP to localhost / Android emulator host -->
+    <domain-config cleartextTrafficPermitted="true">
+        <!-- Standard localhost -->
+        <domain includeSubdomains="false">localhost</domain>
+        <!-- Android emulator routes host machine traffic through 10.0.2.2 -->
+        <domain includeSubdomains="false">10.0.2.2</domain>
+        <!-- Common LAN IP prefix used for physical device dev testing -->
+        <domain includeSubdomains="true">192.168.0.0</domain>
+    </domain-config>
+</network-security-config>

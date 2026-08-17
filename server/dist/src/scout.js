@@ -6,12 +6,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const db_1 = __importDefault(require("./db"));
 const router = (0, express_1.Router)();
-// Fetch active free agents for scouting, filtering by physical parameters
+// Fetch active players for Player Talent Pool
 router.get('/players', async (req, res) => {
-    const { sport, position, height_cm_min, athletic_score_min } = req.query;
+    const { sport, position, height_cm_min, athletic_score_min, q } = req.query;
     try {
         let query = `
-            SELECT p.id, p.full_name as name, a.playing_status as availability_status, p.role as sport_type, 
+            SELECT p.id, p.name as name, a.playing_status as availability_status, p.role as sport_type, 
                    a.primary_position as position, 0 as win_rate, 
                    a.height_cm, a.weight_kg, a.sprint_10m_sec, a.vertical_jump_cm, a.stamina_rating, a.overall_athletic_score
             FROM profiles p
@@ -19,6 +19,10 @@ router.get('/players', async (req, res) => {
             WHERE a.open_for_scouting = true
         `;
         const params = [];
+        if (q) {
+            params.push(`%${q}%`);
+            query += ` AND (p.name ILIKE $${params.length} OR a.primary_position ILIKE $${params.length})`;
+        }
         if (position) {
             params.push(position);
             query += ` AND a.primary_position = $${params.length}`;

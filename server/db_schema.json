@@ -1,0 +1,369 @@
+{
+  "player_registrations": {
+    "columns": [
+      {
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "age",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "gender",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "mobile_number",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "city",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "area",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "preferred_sport",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "playing_position",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "skill_level",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "registration_status",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": "'INCOMPLETE'::text"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()"
+      }
+    ],
+    "constraints": [
+      {
+        "conname": "player_age_valid",
+        "contype": "c",
+        "pg_get_constraintdef": "CHECK (((age IS NULL) OR ((age >= 5) AND (age <= 100))))"
+      },
+      {
+        "conname": "player_registrations_pkey",
+        "contype": "p",
+        "pg_get_constraintdef": "PRIMARY KEY (user_id)"
+      },
+      {
+        "conname": "player_registrations_registration_status_check",
+        "contype": "c",
+        "pg_get_constraintdef": "CHECK ((registration_status = ANY (ARRAY['INCOMPLETE'::text, 'SUBMITTED'::text, 'APPROVED'::text, 'REJECTED'::text])))"
+      },
+      {
+        "conname": "player_registrations_user_id_fkey",
+        "contype": "f",
+        "pg_get_constraintdef": "FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE"
+      }
+    ],
+    "indexes": [
+      {
+        "indexname": "player_registrations_pkey",
+        "indexdef": "CREATE UNIQUE INDEX player_registrations_pkey ON public.player_registrations USING btree (user_id)"
+      }
+    ]
+  },
+  "turf_owner_registrations": {
+    "columns": [
+      {
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "owner_name",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "phone_number",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "business_name",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "business_type",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "registration_number",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "turf_location",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "sports_offered",
+        "data_type": "ARRAY",
+        "is_nullable": "YES",
+        "column_default": "'{}'::text[]"
+      },
+      {
+        "column_name": "number_of_turfs",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "operating_hours",
+        "data_type": "jsonb",
+        "is_nullable": "YES",
+        "column_default": "'{}'::jsonb"
+      },
+      {
+        "column_name": "registration_status",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": "'INCOMPLETE'::text"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()"
+      }
+    ],
+    "constraints": [
+      {
+        "conname": "turf_count_valid",
+        "contype": "c",
+        "pg_get_constraintdef": "CHECK (((number_of_turfs IS NULL) OR (number_of_turfs > 0)))"
+      },
+      {
+        "conname": "turf_owner_registrations_pkey",
+        "contype": "p",
+        "pg_get_constraintdef": "PRIMARY KEY (user_id)"
+      },
+      {
+        "conname": "turf_owner_registrations_registration_status_check",
+        "contype": "c",
+        "pg_get_constraintdef": "CHECK ((registration_status = ANY (ARRAY['INCOMPLETE'::text, 'SUBMITTED'::text, 'APPROVED'::text, 'REJECTED'::text])))"
+      },
+      {
+        "conname": "turf_owner_registrations_user_id_fkey",
+        "contype": "f",
+        "pg_get_constraintdef": "FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE"
+      }
+    ],
+    "indexes": [
+      {
+        "indexname": "turf_owner_registrations_pkey",
+        "indexdef": "CREATE UNIQUE INDEX turf_owner_registrations_pkey ON public.turf_owner_registrations USING btree (user_id)"
+      }
+    ]
+  },
+  "organizer_registrations": {
+    "columns": [
+      {
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "organizer_name",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "phone_number",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "organization_name",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "organization_type",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "registration_number",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "sports_handled",
+        "data_type": "ARRAY",
+        "is_nullable": "YES",
+        "column_default": "'{}'::text[]"
+      },
+      {
+        "column_name": "tournament_experience",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "operating_location",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "registration_status",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": "'INCOMPLETE'::text"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()"
+      }
+    ],
+    "constraints": [
+      {
+        "conname": "organizer_registrations_pkey",
+        "contype": "p",
+        "pg_get_constraintdef": "PRIMARY KEY (user_id)"
+      },
+      {
+        "conname": "organizer_registrations_registration_status_check",
+        "contype": "c",
+        "pg_get_constraintdef": "CHECK ((registration_status = ANY (ARRAY['INCOMPLETE'::text, 'SUBMITTED'::text, 'APPROVED'::text, 'REJECTED'::text])))"
+      },
+      {
+        "conname": "organizer_registrations_user_id_fkey",
+        "contype": "f",
+        "pg_get_constraintdef": "FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE"
+      }
+    ],
+    "indexes": [
+      {
+        "indexname": "organizer_registrations_pkey",
+        "indexdef": "CREATE UNIQUE INDEX organizer_registrations_pkey ON public.organizer_registrations USING btree (user_id)"
+      }
+    ]
+  },
+  "enums": [
+    {
+      "typname": "user_role",
+      "enumlabel": "PLAYER"
+    },
+    {
+      "typname": "user_role",
+      "enumlabel": "TURF_OWNER"
+    },
+    {
+      "typname": "user_role",
+      "enumlabel": "TOURNAMENT_ORGANIZER"
+    },
+    {
+      "typname": "user_role",
+      "enumlabel": "REFEREE"
+    },
+    {
+      "typname": "user_role",
+      "enumlabel": "ADMIN"
+    },
+    {
+      "typname": "user_role",
+      "enumlabel": "VENUE_OWNER"
+    },
+    {
+      "typname": "user_role",
+      "enumlabel": "player"
+    },
+    {
+      "typname": "user_role",
+      "enumlabel": "venue_owner"
+    },
+    {
+      "typname": "user_role",
+      "enumlabel": "referee"
+    },
+    {
+      "typname": "user_role",
+      "enumlabel": "admin"
+    },
+    {
+      "typname": "verification_state",
+      "enumlabel": "PENDING"
+    },
+    {
+      "typname": "verification_state",
+      "enumlabel": "VERIFIED"
+    },
+    {
+      "typname": "verification_state",
+      "enumlabel": "REJECTED"
+    }
+  ]
+}

@@ -1,33 +1,12 @@
-import { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { supabase } from '../supabase';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function ProtectedRoute() {
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+    const { session, loading } = useAuth();
 
-    useEffect(() => {
-        const checkAuth = async () => {
-            const { data } = await supabase.auth.getSession();
-            setIsAuthenticated(!!data.session);
-        };
-
-        checkAuth();
-
-        // Listen for auth changes to kick users out dynamically
-        const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-            if (event === 'SIGNED_OUT') {
-                setIsAuthenticated(false);
-            }
-        });
-
-        return () => {
-            authListener.subscription.unsubscribe();
-        };
-    }, []);
-
-    if (isAuthenticated === null) {
+    if (loading) {
         return <div className="min-h-screen bg-gray-50 flex justify-center items-center text-emerald-700 font-bold">Verifying Secure Access...</div>;
     }
 
-    return isAuthenticated ? <Outlet /> : <Navigate to="/" replace />;
+    return session ? <Outlet /> : <Navigate to="/" replace />;
 }

@@ -78,11 +78,17 @@ app.use('/api/v1/scout', scoutRoutes);
 import ownerRoutes from './owner';
 app.use('/api/v1/owner', ownerRoutes);
 
+import organizerRoutes from './organizer';
+app.use('/api/v1/organizer', organizerRoutes);
+
 import playerRoutesServer from './player';
 app.use('/api/v1/player', playerRoutesServer);
 
 import verificationRoutes from './verification';
 app.use('/api/v1/verification', verificationRoutes);
+
+import registrationRoutes from './registration';
+app.use('/api/v1/registration', registrationRoutes);
 
 import venueRoutes from './venues';
 app.use('/api/v1/venues', venueRoutes);
@@ -95,6 +101,9 @@ app.use('/api/v1/leases', requireAuth, leaseRoutes);
 
 import paymentRoutes from './payments';
 app.use('/api/v1/payments', paymentRoutes);
+
+import notificationRoutes from './notifications';
+app.use('/api/v1/notifications', notificationRoutes);
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

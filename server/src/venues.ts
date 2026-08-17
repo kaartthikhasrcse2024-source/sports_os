@@ -8,7 +8,7 @@ router.get('/search', async (req, res) => {
     const {
         ne_lat, ne_lng, sw_lat, sw_lng,
         center_lat, center_lng, radius_km,
-        sport, min_price, max_price
+        sport, min_price, max_price, search
     } = req.query;
 
     if (!ne_lat || !ne_lng || !sw_lat || !sw_lng) {
@@ -40,6 +40,14 @@ router.get('/search', async (req, res) => {
             tournamentFilters.push(radiusCondition);
         }
 
+        // 2.5 Optional Text Search
+        if (search) {
+            facilityFilters.push(`(f.name ILIKE $${pIndex} OR f.address ILIKE $${pIndex})`);
+            tournamentFilters.push(`(t.name ILIKE $${pIndex} OR f.address ILIKE $${pIndex})`);
+            params.push(`%${search}%`);
+            pIndex++;
+        }
+
         // 3. Optional Sport Pipeline Constraint
         if (sport) {
             facilityFilters.push(`EXISTS (SELECT 1 FROM courts c WHERE c.facility_id = f.id AND c.sport_type = $${pIndex})`);
@@ -51,13 +59,13 @@ router.get('/search', async (req, res) => {
         // 4. Optional Price Constraints
         if (min_price) {
             // Price is stored in cents, API handles dollars or cents? Let's assume client sends cents for precision.
-            facilityFilters.push(`EXISTS (SELECT 1 FROM courts c WHERE c.facility_id = f.id AND c.price_per_hour >= $${pIndex})`);
+            facilityFilters.push(`EXISTS (SELECT 1 FROM courts c WHERE c.facility_id = f.id AND c.base_price_per_hour >= $${pIndex})`);
             tournamentFilters.push(`t.entry_fee >= $${pIndex}`);
             params.push(Number(min_price));
             pIndex++;
         }
         if (max_price) {
-            facilityFilters.push(`EXISTS (SELECT 1 FROM courts c WHERE c.facility_id = f.id AND c.price_per_hour <= $${pIndex})`);
+            facilityFilters.push(`EXISTS (SELECT 1 FROM courts c WHERE c.facility_id = f.id AND c.base_price_per_hour <= $${pIndex})`);
             tournamentFilters.push(`t.entry_fee <= $${pIndex}`);
             params.push(Number(max_price));
             pIndex++;
@@ -71,8 +79,8 @@ router.get('/search', async (req, res) => {
             SELECT 
                 'TURF' as type, 
                 f.id, f.name, f.address, f.lat, f.lng,
-                (SELECT MIN(price_per_hour) FROM courts WHERE facility_id = f.id) as min_rate,
-                (SELECT MAX(price_per_hour) FROM courts WHERE facility_id = f.id) as max_rate
+                (SELECT MIN(base_price_per_hour) FROM courts WHERE facility_id = f.id) as min_rate,
+                (SELECT MAX(base_price_per_hour) FROM courts WHERE facility_id = f.id) as max_rate
             FROM facilities f
             ${facilityWhere}
             

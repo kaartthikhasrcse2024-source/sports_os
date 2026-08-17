@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_URL } from '../config';
 
 export default function GroupBooking() {
     const [slotId, setSlotId] = useState('');
@@ -45,7 +46,7 @@ export default function GroupBooking() {
             // Assuming backend converts contributor_ids. For the sake of the demo, passing raw strings.
             // A full app would resolve emails to UUIDs via an API or invite links.
 
-            const res = await fetch('http://localhost:3001/api/v1/bookings/group-reserve', {
+            const res = await fetch(`${API_URL}/api/v1/bookings/group-reserve`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -53,7 +54,6 @@ export default function GroupBooking() {
                 },
                 body: JSON.stringify({
                     slot_id: slotId,
-                    user_id: session?.user.id,
                     amount,
                     contributor_ids: [session?.user.id, ...emails.map((_, i) => `fake-uuid-${i}`)],
                 }),

@@ -1,0 +1,41 @@
+{
+  "indexes": [
+    {
+      "tablename": "bookings",
+      "indexname": "bookings_pkey",
+      "indexdef": "CREATE UNIQUE INDEX bookings_pkey ON public.bookings USING btree (id)"
+    }
+  ],
+  "cols": [
+    {
+      "column_name": "id",
+      "data_type": "uuid"
+    },
+    {
+      "column_name": "slot_id",
+      "data_type": "uuid"
+    },
+    {
+      "column_name": "user_id",
+      "data_type": "uuid"
+    },
+    {
+      "column_name": "status",
+      "data_type": "USER-DEFINED"
+    },
+    {
+      "column_name": "total_amount",
+      "data_type": "numeric"
+    },
+    {
+      "column_name": "created_at",
+      "data_type": "timestamp without time zone"
+    }
+  ],
+  "slots": [
+    {
+      "status": "available"
+    }
+  ],
+  "bookings": []
+}

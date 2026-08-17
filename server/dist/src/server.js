@@ -65,6 +65,26 @@ app.get('/api/profile', auth_1.requireAuth, async (req, res) => {
 });
 const scout_1 = __importDefault(require("./scout"));
 app.use('/api/v1/scout', scout_1.default);
+const owner_1 = __importDefault(require("./owner"));
+app.use('/api/v1/owner', owner_1.default);
+const organizer_1 = __importDefault(require("./organizer"));
+app.use('/api/v1/organizer', organizer_1.default);
+const player_1 = __importDefault(require("./player"));
+app.use('/api/v1/player', player_1.default);
+const verification_1 = __importDefault(require("./verification"));
+app.use('/api/v1/verification', verification_1.default);
+const registration_1 = __importDefault(require("./registration"));
+app.use('/api/v1/registration', registration_1.default);
+const venues_1 = __importDefault(require("./venues"));
+app.use('/api/v1/venues', venues_1.default);
+const escrow_1 = __importDefault(require("./escrow"));
+app.use('/api/v1/escrow', escrow_1.default);
+const leases_1 = __importDefault(require("./leases"));
+app.use('/api/v1/leases', auth_1.requireAuth, leases_1.default);
+const payments_1 = __importDefault(require("./payments"));
+app.use('/api/v1/payments', payments_1.default);
+const notifications_1 = __importDefault(require("./notifications"));
+app.use('/api/v1/notifications', notifications_1.default);
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });

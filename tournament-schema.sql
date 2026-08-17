@@ -34,3 +34,14 @@ CREATE TABLE IF NOT EXISTS bracket_matches (
   court_slot_id uuid REFERENCES slots(id),
   created_at timestamp DEFAULT now()
 );
+
+
+
+            CREATE TABLE IF NOT EXISTS tournament_team_players (
+                team_id uuid REFERENCES tournament_teams(id) ON DELETE CASCADE,
+                player_id uuid REFERENCES profiles(id) ON DELETE CASCADE,
+                joined_at timestamp DEFAULT now(),
+                status text DEFAULT 'ACTIVE',
+                PRIMARY KEY (team_id, player_id)
+            );
+        

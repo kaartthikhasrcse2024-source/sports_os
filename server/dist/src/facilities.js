@@ -5,7 +5,36 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const db_1 = __importDefault(require("./db"));
+const auth_1 = require("./auth");
 const router = (0, express_1.Router)();
+router.post('/', (0, auth_1.requireVerifiedRole)(['TURF_OWNER']), async (req, res) => {
+    const user = req.user;
+    const { name, address, lat, lng, is_outdoor, tags } = req.body;
+    if (!name || !lat || !lng) {
+        res.status(400).json({ error: 'Missing required boundary fields: name, lat, lng' });
+        return;
+    }
+    try {
+        const pointWKT = `POINT(${lng} ${lat})`;
+        const result = await db_1.default.query(`INSERT INTO facilities (name, address, owner_id, lat, lng, location, is_outdoor, tags)
+             VALUES ($1, $2, $3, $4, $5, ST_GeomFromText($6, 4326), $7, $8)
+             RETURNING *`, [name, address, user.sub || user.id, lat, lng, pointWKT, is_outdoor || false, JSON.stringify(tags || {})]);
+        res.json({ success: true, facility: result.rows[0] });
+    }
+    catch (e) {
+        console.error('Facility Creation Error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+router.get('/', async (req, res) => {
+    try {
+        const result = await db_1.default.query('SELECT * FROM facilities ORDER BY name ASC');
+        res.json(result.rows);
+    }
+    catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
 router.get('/nearby', async (req, res) => {
     const { lat, lng, radius_km = 10, tags } = req.query;
     if (!lat || !lng) {

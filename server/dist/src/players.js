@@ -33,7 +33,7 @@ router.get('/:id/stats', async (req, res) => {
         res.status(500).json({ error: e.message });
     }
 });
-// Fetch active free agents natively evaluating mapping indexes accurately sorting
+// Fetch Free Agent Status accurately sorting
 router.get('/free-agents', async (req, res) => {
     const { sport, position } = req.query;
     try {

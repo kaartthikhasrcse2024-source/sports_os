@@ -8,7 +8,7 @@ const path_1 = __importDefault(require("path"));
 dotenv_1.default.config({ path: path_1.default.resolve(process.cwd(), '../.env') });
 const db_1 = __importDefault(require("../src/db"));
 async function runTest() {
-    // 1. Seed profiles mimicking Free Agent and participant logic
+    // 1. Seed profiles mimicking Player Talent Pool and participant logic
     const p1Id = '00000000-0000-0000-0000-111111111111';
     const p2Id = '00000000-0000-0000-0000-222222222222';
     const refId = '00000000-0000-0000-0000-333333333333';
@@ -37,7 +37,7 @@ async function runTest() {
             { player_id: p2Id, team_id: tB, points: 15, goals: 0, fouls: 4, minutes: 38 }
         ]
     };
-    let res = await fetch(`http://localhost:3001/api/v1/referees/matches/${matchId}/scorecard`, {
+    let res = await fetch(`http://localhost:3001/api/v1/referees/matches/${matchId}/live-match-scorecard`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(statsPayload)
@@ -53,10 +53,10 @@ async function runTest() {
     // 5. Check Free Agency
     const faFetch = await fetch(`http://localhost:3001/api/v1/players/free-agents?sport=basketball`);
     const faJson = await faFetch.json();
-    console.log('Free Agents Filter found:', faJson.length);
+    console.log('Player Talent Pool Filter found:', faJson.length);
     console.assert(faJson.some((p) => p.name === 'Player One'), 'Player One should be correctly identified looking_for_team');
     console.assert(!faJson.some((p) => p.name === 'Player Two'), 'Player Two must be omitted properly handling not_available scope');
-    console.log('✅ TEST PASSED: Referee Scorecards correctly cascade bracket matches automatically and publish Verified Profiling logic accurately.');
+    console.log('✅ TEST PASSED: Live Match Scorecard correctly cascade bracket matches automatically and publish Verified Profiling logic accurately.');
     await db_1.default.end();
 }
 runTest().catch(console.error);

@@ -6,7 +6,7 @@ export default function Signup() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [fullName, setFullName] = useState('');
-    const [role, setRole] = useState('player');
+    const [role, setRole] = useState('PLAYER');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -56,8 +56,8 @@ export default function Signup() {
                             onChange={(e) => setRole(e.target.value)}
                             className="w-full bg-gray-50 border border-gray-300 rounded p-2 text-gray-900 focus:outline-none focus:border-emerald-600 transition-colors"
                         >
-                            <option value="player">Player / Athlete</option>
-                            <option value="venue_owner">Turf Owner / Manager</option>
+                            <option value="PLAYER">Player / Athlete</option>
+                            <option value="TURF_OWNER">Turf Owner / Manager</option>
                         </select>
                     </div>
                     <div>

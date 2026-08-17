@@ -1,8 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import { createClient } from '@supabase/supabase-js';
 import pool from './db';
 
-export const requireAuth = (req: Request, res: Response, next: NextFunction): void => {
+const supabase = createClient(process.env.SUPABASE_URL as string, process.env.SUPABASE_ANON_KEY as string);
+
+export const requireAuth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         res.status(401).json({ error: 'Missing or invalid authorization header' });
@@ -12,6 +14,11 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction): vo
     const token = authHeader.split(' ')[1];
 
     if (token.startsWith('dev-mode-token')) {
+        if (process.env.NODE_ENV === 'production') {
+            res.status(401).json({ error: 'Invalid token' });
+            return;
+        }
+
         const parts = token.split(':');
         const rawRole = parts[1] || 'TOURNAMENT_ORGANIZER';
         const mockRole = rawRole.toUpperCase();
@@ -26,28 +33,44 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction): vo
     }
 
     try {
-        const jwtSecret = process.env.SUPABASE_JWT_SECRET;
-        if (!jwtSecret) {
-            throw new Error("SUPABASE_JWT_SECRET is not configured");
+        const { data: { user }, error } = await supabase.auth.getUser(token);
+        if (error || !user) {
+            throw new Error("Invalid token via Supabase Auth API");
         }
-        const decoded = jwt.verify(token, jwtSecret);
-        // Attach decoded user information to the request
-        (req as any).user = decoded;
+
+        // Attach decoded user information to the request mapping standard JWT sub
+        (req as any).user = {
+            id: user.id,
+            sub: user.id,
+            email: user.email,
+            user_metadata: user.user_metadata,
+            app_metadata: user.app_metadata,
+            role: user.role
+        };
         next();
     } catch (error) {
+        console.error('Token authentication error', error);
         res.status(401).json({ error: 'Invalid token' });
     }
 };
 
-export const requireRole = (allowedRoles: ('player' | 'venue_owner' | 'referee' | 'admin')[]) => {
+export const normalizeRole = (role: string | undefined | null): string => {
+    return role ? role.toUpperCase() : '';
+};
+
+type CanonicalRole = 'PLAYER' | 'TURF_OWNER' | 'TOURNAMENT_ORGANIZER' | 'REFEREE' | 'ADMIN' | 'VENUE_OWNER';
+
+export const requireRole = (allowedRoles: CanonicalRole[]) => {
     return (req: Request, res: Response, next: NextFunction): void => {
         requireAuth(req, res, () => {
             const user = (req as any).user;
-            let userRole = (user.role || user.user_metadata?.role || 'player').toLowerCase();
-            if (userRole === 'turf_owner') userRole = 'venue_owner';
+            let rawRole = user.user_metadata?.role || user.app_metadata?.role;
+            if (user.role && user.role !== 'authenticated' && user.role !== 'anon') rawRole = rawRole || user.role;
 
-            if (!allowedRoles.includes(userRole as any)) {
-                res.status(403).json({ error: `Forbidden: role ${user.role} is not authorized` });
+            const normalizedRole = normalizeRole(rawRole || 'PLAYER');
+
+            if (!allowedRoles.includes(normalizedRole as CanonicalRole)) {
+                res.status(403).json({ error: `Forbidden: role ${normalizedRole} is not authorized` });
                 return;
             }
             next();
@@ -55,13 +78,16 @@ export const requireRole = (allowedRoles: ('player' | 'venue_owner' | 'referee' 
     };
 };
 
-export const requireVerifiedRole = (allowedRoles: string[]) => {
+export const requireVerifiedRole = (allowedRoles: CanonicalRole[]) => {
     return (req: Request, res: Response, next: NextFunction): void => {
         requireAuth(req, res, async () => {
             const user = (req as any).user;
-            const userRole = (user.role || user.user_metadata?.role || user.app_metadata?.role || 'PLAYER').toUpperCase();
+            let rawRoleVerified = user.user_metadata?.role || user.app_metadata?.role;
+            if (user.role && user.role !== 'authenticated' && user.role !== 'anon') rawRoleVerified = rawRoleVerified || user.role;
 
-            if (!allowedRoles.map(r => r.toUpperCase()).includes(userRole)) {
+            const userRole = normalizeRole(rawRoleVerified || 'PLAYER');
+
+            if (!allowedRoles.includes(userRole as CanonicalRole)) {
                 res.status(403).json({ error: `Forbidden: role ${userRole} is not authorized` });
                 return;
             }

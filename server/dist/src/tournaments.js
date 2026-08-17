@@ -5,38 +5,140 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const db_1 = __importDefault(require("./db"));
+const auth_1 = require("./auth");
+const notifications_1 = require("./services/notifications");
 const router = (0, express_1.Router)();
-// Create Tournament
-router.post('/', async (req, res) => {
-    const { facility_id, name, format, max_teams, start_date } = req.body;
+// Get all tournaments dynamically so players/organizers can view them
+router.get('/', async (req, res) => {
     try {
-        const result = await db_1.default.query(`INSERT INTO tournaments (facility_id, name, format, max_teams, start_date) 
-             VALUES ($1, $2, $3, $4, $5) RETURNING *`, [facility_id, name, format, max_teams, start_date]);
-        res.json(result.rows[0]);
+        const result = await db_1.default.query(`SELECT t.*, f.name as facility_name 
+             FROM tournaments t 
+             LEFT JOIN facilities f ON t.facility_id = f.id
+             ORDER BY t.created_at DESC`);
+        res.json(result.rows);
     }
     catch (e) {
-        res.status(500).json({ error: e.message });
+        console.error('Create tournament error', e);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
-// Create Team Registration
-router.post('/:id/teams', async (req, res) => {
-    const { team_name } = req.body;
-    const { id } = req.params;
+// Create Tournament (VERIFIED TOURNAMENT ORGANIZER ONLY)
+router.post('/', (0, auth_1.requireVerifiedRole)(['TOURNAMENT_ORGANIZER']), async (req, res) => {
+    const { facility_id, name, format, max_teams, start_date } = req.body;
+    const organizerId = req.user.sub || req.user.id;
     try {
-        const result = await db_1.default.query(`INSERT INTO tournament_teams (tournament_id, team_name) VALUES ($1, $2) RETURNING *`, [id, team_name]);
+        const result = await db_1.default.query(`INSERT INTO tournaments (facility_id, name, format, max_teams, start_date, organizer_id) 
+             VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`, [facility_id, name, format, max_teams, start_date, organizerId]);
         res.json(result.rows[0]);
     }
     catch (e) {
-        res.status(500).json({ error: e.message });
+        console.error('Create tournament error', e);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+// Team Sign-Up & Entry
+router.post('/:id/teams', (0, auth_1.requireVerifiedRole)(['PLAYER', 'TOURNAMENT_ORGANIZER']), async (req, res) => {
+    const { team_name } = req.body;
+    const { id } = req.params;
+    const userId = req.user.sub || req.user.id;
+    try {
+        await db_1.default.query('BEGIN');
+        // Enforce lock bounding maximum teams seamlessly generating accurate capacity limits
+        const tQuery = await db_1.default.query(`SELECT id, name, max_teams, status, organizer_id FROM tournaments WHERE id = $1 FOR UPDATE`, [id]);
+        if (tQuery.rows.length === 0)
+            throw new Error('Tournament not found');
+        if (tQuery.rows[0].status !== 'OPEN') {
+            await db_1.default.query('ROLLBACK');
+            return res.status(403).json({ error: 'Registration is closed' });
+        }
+        const maxTeams = tQuery.rows[0].max_teams;
+        // Check explicit registration counts avoiding concurrent bypass potentials
+        const countQuery = await db_1.default.query(`SELECT count(id) FROM tournament_teams WHERE tournament_id = $1`, [id]);
+        if (parseInt(countQuery.rows[0].count) >= maxTeams) {
+            await db_1.default.query('ROLLBACK');
+            return res.status(409).json({ error: 'Tournament registration is completely full.' });
+        }
+        const result = await db_1.default.query(`INSERT INTO tournament_teams (tournament_id, team_name, captain_id) VALUES ($1, $2, $3) RETURNING *`, [id, team_name, userId]);
+        const team = result.rows[0];
+        // Add creator securely to the normalized mapping table natively
+        await db_1.default.query(`INSERT INTO tournament_team_players (team_id, player_id, status) VALUES ($1, $2, 'ACTIVE')`, [team.id, userId]);
+        await db_1.default.query('COMMIT');
+        // Cross Actor Notification Pipeline resolving post-transaction hooks precisely avoiding mock limits
+        if (tQuery.rows[0].organizer_id) {
+            await (0, notifications_1.createNotification)(db_1.default, {
+                recipientId: tQuery.rows[0].organizer_id,
+                actorId: userId,
+                type: 'TOURNAMENT_TEAM_REGISTERED',
+                title: 'New Team Registration',
+                message: `Team ${team_name} successfully registered for ${tQuery.rows[0].name}`,
+                entityType: 'TOURNAMENT',
+                entityId: id
+            });
+        }
+        res.json(team);
+    }
+    catch (e) {
+        await db_1.default.query('ROLLBACK');
+        console.error('Tournament team sign-up error', e);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+// Join Active Team seamlessly
+router.post('/teams/:team_id/join', (0, auth_1.requireVerifiedRole)(['PLAYER']), async (req, res) => {
+    const team_id = req.params.team_id;
+    const playerId = req.user.sub || req.user.id;
+    try {
+        // Enforce team availability preventing unauthorized modifications natively
+        const teamCheck = await db_1.default.query('SELECT id, tournament_id FROM tournament_teams WHERE id = $1', [team_id]);
+        if (teamCheck.rows.length === 0)
+            return res.status(404).json({ error: 'Team not found' });
+        // Enforce deduplication natively checking status directly blocking double overlaps
+        const exists = await db_1.default.query('SELECT 1 FROM tournament_team_players WHERE team_id = $1 AND player_id = $2', [team_id, playerId]);
+        if (exists.rows.length > 0)
+            return res.json({ success: true, message: "Already a member." });
+        await db_1.default.query(`INSERT INTO tournament_team_players (team_id, player_id, status)
+             VALUES ($1, $2, 'ACTIVE')
+             ON CONFLICT (team_id, player_id) DO NOTHING`, [team_id, playerId]);
+        res.json({ success: true, message: "Successfully joined team securely." });
+    }
+    catch (e) {
+        console.error('Create tournament error', e);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+// Leave Team / Remove Player securely
+router.delete('/teams/:team_id/players/:player_id', (0, auth_1.requireVerifiedRole)(['PLAYER', 'TOURNAMENT_ORGANIZER']), async (req, res) => {
+    const team_id = req.params.team_id;
+    const player_id = req.params.player_id;
+    const authId = req.user.sub || req.user.id;
+    try {
+        // Allow self removal OR removal by explicitly mapped captain
+        if (authId !== player_id) {
+            const team = await db_1.default.query('SELECT captain_id FROM tournament_teams WHERE id = $1', [team_id]);
+            if (team.rows.length === 0 || team.rows[0].captain_id !== authId) {
+                return res.status(403).json({ error: 'You are not authorized to remove this player.' });
+            }
+        }
+        await db_1.default.query('DELETE FROM tournament_team_players WHERE team_id = $1 AND player_id = $2', [team_id, player_id]);
+        res.json({ success: true, message: 'Player securely removed.' });
+    }
+    catch (e) {
+        console.error('Create tournament error', e);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 // Generate Brackets
-router.post('/:id/generate', async (req, res) => {
+router.post('/:id/generate', (0, auth_1.requireVerifiedRole)(['TOURNAMENT_ORGANIZER']), async (req, res) => {
     const { id } = req.params;
+    const organizerId = req.user.sub || req.user.id;
     try {
-        const tQuery = await db_1.default.query(`SELECT format FROM tournaments WHERE id = $1`, [id]);
+        const tQuery = await db_1.default.query(`SELECT format, organizer_id FROM tournaments WHERE id = $1`, [id]);
         if (tQuery.rows.length === 0)
             return res.status(404).json({ error: 'Not found' });
+        // Strict Authorization Constraint bounding the explicitly matched identity over generation
+        if (tQuery.rows[0].organizer_id !== organizerId) {
+            return res.status(403).json({ error: 'You do not have permission to generate this tournament bracket.' });
+        }
         const format = tQuery.rows[0].format;
         const teamsQuery = await db_1.default.query(`SELECT id FROM tournament_teams WHERE tournament_id = $1`, [id]);
         const teams = teamsQuery.rows;
@@ -56,7 +158,7 @@ router.post('/:id/generate', async (req, res) => {
             for (let r = numRounds; r >= 1; r--) {
                 const matchCount = Math.pow(2, numRounds - r); // Finals(1), Semis(2), Quarters(4)
                 for (let i = 0; i < matchCount; i++) {
-                    const mRes = await db_1.default.query(`INSERT INTO bracket_matches (tournament_id, round, match_index) VALUES ($1, $2, $3) RETURNING id`, [id, r, i]);
+                    const mRes = await db_1.default.query(`INSERT INTO bracket_matches(tournament_id, round, match_index) VALUES($1, $2, $3) RETURNING id`, [id, r, i]);
                     const matchId = mRes.rows[0].id;
                     matchesByRound[r - 1].push(matchId);
                     // Wire to parent
@@ -100,27 +202,46 @@ router.post('/:id/generate', async (req, res) => {
             let matchIdx = 0;
             for (let i = 0; i < teams.length; i++) {
                 for (let j = i + 1; j < teams.length; j++) {
-                    await db_1.default.query(`INSERT INTO bracket_matches (tournament_id, round, match_index, team_a_id, team_b_id) VALUES ($1, $2, $3, $4, $5)`, [id, 1, matchIdx++, teams[i].id, teams[j].id]);
+                    await db_1.default.query(`INSERT INTO bracket_matches(tournament_id, round, match_index, team_a_id, team_b_id) VALUES($1, $2, $3, $4, $5)`, [id, 1, matchIdx++, teams[i].id, teams[j].id]);
                 }
             }
         }
         res.json({ success: true });
     }
     catch (e) {
-        res.status(500).json({ error: e.message });
+        console.error('Create tournament error', e);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 router.get('/:id/data', async (req, res) => {
     const { id } = req.params;
-    const teams = await db_1.default.query(`SELECT * FROM tournament_teams WHERE tournament_id = $1`, [id]);
-    const matches = await db_1.default.query(`SELECT * FROM bracket_matches WHERE tournament_id = $1 ORDER BY round ASC, match_index ASC`, [id]);
-    res.json({ teams: teams.rows, matches: matches.rows });
+    try {
+        const teams = await db_1.default.query(`SELECT * FROM tournament_teams WHERE tournament_id = $1`, [id]);
+        const matches = await db_1.default.query(`SELECT * FROM bracket_matches WHERE tournament_id = $1 ORDER BY round ASC, match_index ASC`, [id]);
+        // Fetch explicit authentic players mapped mathematically via junction table
+        const players = await db_1.default.query(`SELECT p.id, p.name, p.sport_type, p.position, tp.team_id 
+             FROM profiles p
+             JOIN tournament_team_players tp ON p.id = tp.player_id
+             JOIN tournament_teams tt ON tp.team_id = tt.id
+             WHERE tt.tournament_id = $1 AND tp.status = 'ACTIVE'`, [id]);
+        res.json({ teams: teams.rows, matches: matches.rows, roster: players.rows });
+    }
+    catch (e) {
+        console.error('Create tournament error', e);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 // Admin resolving logic triggering cascaded boundaries forwards mapping strictly
-router.post('/:id/matches/:match_id/winner', async (req, res) => {
-    const { match_id } = req.params;
+router.post('/:id/matches/:match_id/winner', (0, auth_1.requireVerifiedRole)(['TOURNAMENT_ORGANIZER']), async (req, res) => {
+    const { id, match_id } = req.params;
     const { winner_id } = req.body;
+    const organizerId = req.user.sub || req.user.id;
     try {
+        // Enforce ownership
+        const tCheck = await db_1.default.query('SELECT organizer_id FROM tournaments WHERE id = $1', [id]);
+        if (tCheck.rows[0]?.organizer_id !== organizerId) {
+            return res.status(403).json({ error: 'Unauthorized to modify tournament matches.' });
+        }
         await db_1.default.query(`UPDATE bracket_matches SET winner_id = $1 WHERE id = $2`, [winner_id, match_id]);
         // Propagate branch correctly bounding explicit children sequentially
         const m = await db_1.default.query(`SELECT next_match_id, match_index FROM bracket_matches WHERE id = $1`, [match_id]);
@@ -132,19 +253,27 @@ router.post('/:id/matches/:match_id/winner', async (req, res) => {
         res.json({ success: true });
     }
     catch (e) {
-        res.status(500).json({ error: e.message });
+        console.error('Create tournament error', e);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 // Organizer Court Locking
-router.post('/:id/matches/:match_id/slot', async (req, res) => {
-    const { match_id } = req.params;
+router.post('/:id/matches/:match_id/slot', (0, auth_1.requireVerifiedRole)(['TOURNAMENT_ORGANIZER']), async (req, res) => {
+    const { id, match_id } = req.params;
     const { slot_id } = req.body;
+    const organizerId = req.user.sub || req.user.id;
     try {
+        // Enforce ownership natively validating organizer rights gracefully
+        const tCheck = await db_1.default.query('SELECT organizer_id FROM tournaments WHERE id = $1', [id]);
+        if (tCheck.rows[0]?.organizer_id !== organizerId) {
+            return res.status(403).json({ error: 'Unauthorized to lock slots.' });
+        }
         await db_1.default.query(`UPDATE bracket_matches SET court_slot_id = $1 WHERE id = $2`, [slot_id, match_id]);
         res.json({ success: true });
     }
     catch (e) {
-        res.status(500).json({ error: e.message });
+        console.error('Create tournament error', e);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 exports.default = router;
